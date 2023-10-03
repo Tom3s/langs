@@ -1,0 +1,16 @@
+var a: int = read().toInt()
+var b: int = read().toInt()
+var c: int = read().toInt()
+
+func gcd(a: int, b: int) -> int {
+	while a != b {
+		if a > b {
+			a = a - b
+		} else {
+			b = b - a
+		}
+	}
+	return a
+}
+
+print("GCD of the numbers inputed: ", gcd(a, gcd(b, c)))

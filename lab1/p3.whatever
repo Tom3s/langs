@@ -1,0 +1,11 @@
+var n: int = read().toInt()
+
+var sum: int = 0
+
+for i in n {
+	n = read().toInt()
+
+	sum += n
+}
+
+print("Sum of inputed ", n, " numbers is: ", sum)

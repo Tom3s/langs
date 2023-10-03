@@ -1,0 +1,18 @@
+int a = 10 // incorrect declaration
+
+if a % 2 = 0 { // incorrect operator - should be ==
+	/* do stuff */
+}
+
+if true or false { // incorrect operator - should be ||
+	/* do stuff */
+} elif true { // incorrect operator - no elif kw - should be else if
+	/* do more stuff */
+}
+
+func square(n: int) { // missing return type
+	return n ** 2 // incorrect operator - should be ^
+}
+
+
+
