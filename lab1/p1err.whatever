@@ -13,6 +13,3 @@ if true or false { // incorrect operator - should be ||
 func square(n: int) { // missing return type
 	return n ** 2 // incorrect operator - should be ^
 }
-
-
-
