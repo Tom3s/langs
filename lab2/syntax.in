@@ -1,0 +1,21 @@
+declaration:
+var <varname>: <type>
+const <constname>: <type>
+
+assignment:
+<varname> = <newvalue>
+
+
+if <condition> { <code> } - if statement
+if <condition> { <code> } else { <code> } - if-else statement
+while <condition> { <code> } - while loop
+do { <code> } while <condition> - do-while loop
+for <variable> in list { <code> } - for loop
+for <variable> in <int/str> { <code> } - for effectivly range(number)
+for (init) (stop) (post) { <code> } - for loop
+
+func <funcname>(<?arguments>) -> return <type> { <code> } - function
+
+print(<?arguments>) - print to console
+read(<variable>) -> str - read from console
+readln(<variable>) -> str - read from console with new line

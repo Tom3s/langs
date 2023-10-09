@@ -1,0 +1,68 @@
+variable/function names:
+- a-z, A-Z, 0-9, _
+
+reserved symbols:
+- standard operators:
+
++ - addition
+- - subtraction
+* - multiplication
+/ - division
+% - modulo
+^ - exponentiation
+
+- comparison operators (compare by value):
+
+== - equal
+!= - not equal
+< - less than
+> - greater than
+<= - less than or equal
+>= - greater than or equal
+
+- logical operators (compare by value):
+
+&& - and
+|| - or
+! - not
+
+- comments:
+
+// - single line comment
+/* - start comment
+*/ - end comment
+/// - documentation comment
+
+Keywords:
+
+- declaration
+var - variable
+const - constant
+
+- types:
+int - integer
+float - floating point number
+bool - boolean
+char - character
+str - string
+list - list
+dict - dictionary
+
+- flow control
+if / else / else if - branching
+while -
+do .. while -
+for .. in -
+break
+continue
+return
+
+- functions
+func - define new function
+
+- constants
+true -
+false -
+pi - 3.14...
+e - 2.71...
+null - special zero
