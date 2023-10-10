@@ -1,19 +1,46 @@
-'' or "" for string and char
-f'{variable} string literal'
--> equals to variable.toString() + " string literal"
-
-[] - lists
--> var myList: int[] = [1, 2, 3, 4]
--> var myList: list[int]
-{} - dict
--> var myDict: dict[int, list[float]] = {
-	1: [a, b, c],
-	3: [c, e],
-	55: [q, t], // trailing commas are allowed in lists/dicts
++
+-
+*
+/
+^
+=
+<
+<=
+==
+>=
+&&
+||
+!=
+[
+]
+{
 }
--> var myDict: dict[str, int]
-
-scopes are defined with {}
-
-
-
+(
+)
+:
+"
+'
+var
+const
+int
+float
+bool
+char
+str
+list
+dict
+if
+else
+while
+do
+for
+in
+break
+continue
+return
+func
+true
+false
+pi
+e
+null

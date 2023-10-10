@@ -1,68 +1,56 @@
-variable/function names:
-- a-z, A-Z, 0-9, _
+Alphabet:
+	a. Upper (A-Z) and lower case letters (a-z) of the English alphabet
+	b. Underline character '_';
+	c. Decimal digits (0-9);
 
-reserved symbols:
-- standard operators:
+Lexic:
 
-+ - addition
-- - subtraction
-* - multiplication
-/ - division
-% - modulo
-^ - exponentiation
+a.Special symbols, representing:
 
-- comparison operators (compare by value):
+- operators + - * / ^ = < <= == >= && || !=
+- separators [ ] { } ( ) : ; space newline
+- reserved words:
+	var
+	const
+	int
+	float
+	bool
+	char
+	str
+	list
+	dict
+	if
+	else
+	while
+	do
+	for
+	in
+	break
+	continue
+	return
+	func
+	true
+	false
+	pi
+	e
+	null
 
-== - equal
-!= - not equal
-< - less than
-> - greater than
-<= - less than or equal
->= - greater than or equal
+b.identifiers
+-a sequence of letters and  digits, such that there's at least one letter:
+	identifier ::= /^[a-zA-Z0-9]*[a-zA-Z][a-zA-Z0-9]*$/
+	letter ::= [A-Za-z]{1}
+	digit ::= [0-9]{1}
 
-- logical operators (compare by value):
 
-&& - and
-|| - or
-! - not
+c.constants
+	1.integer - rule:
+		nrconst := "+" nr | "-" nr | nr
+		nr := digit{nr}
 
-- comments:
+	2.character
+		character:='letter'|'digit'
 
-// - single line comment
-/* - start comment
-*/ - end comment
-/// - documentation comment
-
-Keywords:
-
-- declaration
-var - variable
-const - constant
-
-- types:
-int - integer
-float - floating point number
-bool - boolean
-char - character
-str - string
-list - list
-dict - dictionary
-
-- flow control
-if / else / else if - branching
-while -
-do .. while -
-for .. in -
-break
-continue
-return
-
-- functions
-func - define new function
-
-- constants
-true -
-false -
-pi - 3.14...
-e - 2.71...
-null - special zero
+	3.string
+		constchar := "string" | 'string'
+		string := char{string}
+		char := letter|digit

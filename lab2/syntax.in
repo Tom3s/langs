@@ -1,21 +1,28 @@
-declaration:
-var <varname>: <type>
-const <constname>: <type>
-
-assignment:
-<varname> = <newvalue>
-
-
-if <condition> { <code> } - if statement
-if <condition> { <code> } else { <code> } - if-else statement
-while <condition> { <code> } - while loop
-do { <code> } while <condition> - do-while loop
-for <variable> in list { <code> } - for loop
-for <variable> in <int/str> { <code> } - for effectivly range(number)
-for (init) (stop) (post) { <code> } - for loop
-
-func <funcname>(<?arguments>) -> return <type> { <code> } - function
-
-print(<?arguments>) - print to console
-read(<variable>) -> str - read from console
-readln(<variable>) -> str - read from console with new line
+program ::= decllist "\n" cmpdstmt 
+decllist ::= declaration "\n" | declaration "\n" decllist
+declaration ::= MUTABILITY IDENTIFIER ":" type1 "\n" 
+declassignstmt ::= MUTABILITY IDENTIFIER ":" type1 "=" expression "\n" 
+MUTABILITY ::= "var" | "const"
+type1 ::= "int" | "float" | "bool" | "char" | "str" | "list" | "dict"
+arraydecl ::= type1"[]" | "list[" type1 "]"
+dictdecl ::= "dict[" type1 "," type1 "]" | "dict[" type1 "," arraydecl "]"
+type  ::= type1 | arraydecl | dictdecl
+cmpdstmt ::= "{" stmtlist "}" | stmtlist
+stmtlist ::= stmt | stmt "\n" stmtlist
+stmt ::= simplstmt | structstmt
+simplstmt ::= assignstmt | iostmt | assignstmt
+assignstmt ::= IDENTIFIER "=" expression
+expression ::= expression "+" term | term
+term ::= term "*" factor | factor
+factor ::= "(" expression ")" | IDENTIFIER
+iostmt ::= "read()" | "readln()" | "print(" varlenargs ")"
+varlenargs ::= expression | expression "," varlenargs
+structstmt ::= cmpdstmt | ifstmt | whilestmt
+ifstmt ::= "if" condition "{" cmpdstmt "}" | "if" condition "{" cmpdstmt "}" "else" stmt
+forstmt ::= "for" IDENTIFIER "in" IDENTIFIER "{" cmpdstmt "}" | "for" "(" simplstmt ")" "(" condition ")" "(" simplstmt ")" "{" cmpdstmt "}"
+whilestmt ::= "while" condition "{" cmpdstmt "}"
+dowhilestmt ::= "do" "{" cmpdstmt "}" "while" condition "\n"
+cmpdcondition ::= condition | "!" condition | condition LOGICALRELATION cmpdcondition
+condition ::= expression RELATION expression
+RELATION ::= "==" | "!=" | "<" | "<=" | ">" | ">="
+LOGICALRELATION ::= "&&" | "||"
