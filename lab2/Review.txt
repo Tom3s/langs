@@ -1,0 +1,3 @@
+I reviewed my colleague's lab and suggested that:
+
+- optional typing should be specified with | in syntax.in

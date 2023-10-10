@@ -1,20 +1,19 @@
-program ::= decllist "\n" cmpdstmt 
-decllist ::= declaration "\n" | declaration "\n" decllist
-declaration ::= MUTABILITY IDENTIFIER ":" type1 "\n" 
-declassignstmt ::= MUTABILITY IDENTIFIER ":" type1 "=" expression "\n" 
-MUTABILITY ::= "var" | "const"
+program ::= cmpdstmt
 type1 ::= "int" | "float" | "bool" | "char" | "str" | "list" | "dict"
 arraydecl ::= type1"[]" | "list[" type1 "]"
 dictdecl ::= "dict[" type1 "," type1 "]" | "dict[" type1 "," arraydecl "]"
 type  ::= type1 | arraydecl | dictdecl
-cmpdstmt ::= "{" stmtlist "}" | stmtlist
-stmtlist ::= stmt | stmt "\n" stmtlist
+cmpdstmt ::= stmtlist | "{" stmtlist "}"
+stmtlist ::= stmt "\n" | stmt "\n" stmtlist
 stmt ::= simplstmt | structstmt
-simplstmt ::= assignstmt | iostmt | assignstmt
+simplstmt ::= assignstmt | iostmt | declaration | declassignstmt
+declaration ::= MUTABILITY IDENTIFIER ":" type1 "\n" 
+declassignstmt ::= MUTABILITY IDENTIFIER ":" type1 "=" expression "\n" 
+MUTABILITY ::= "var" | "const" 
 assignstmt ::= IDENTIFIER "=" expression
 expression ::= expression "+" term | term
 term ::= term "*" factor | factor
-factor ::= "(" expression ")" | IDENTIFIER
+factor ::= "(" expression ")" | IDENTIFIER | functioncall
 iostmt ::= "read()" | "readln()" | "print(" varlenargs ")"
 varlenargs ::= expression | expression "," varlenargs
 structstmt ::= cmpdstmt | ifstmt | whilestmt
@@ -26,3 +25,7 @@ cmpdcondition ::= condition | "!" condition | condition LOGICALRELATION cmpdcond
 condition ::= expression RELATION expression
 RELATION ::= "==" | "!=" | "<" | "<=" | ">" | ">="
 LOGICALRELATION ::= "&&" | "||"
+functiondecl ::= "func" IDENTIFIER "(" arglist ")" "->" type "{" cmpdstmt "}"
+arglist ::= IDENTIFIER ":" type | IDENTIFIER ":" type "," arglist
+functioncall ::= IDENTIFIER "()" | IDENTIFIER "." functioncall
+comment ::= "//" IGNORED_CODE "\n" | "/*" IGNORED_CODE "*/" | "///" IGNORED_CODE "\n"
