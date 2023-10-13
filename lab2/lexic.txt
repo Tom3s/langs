@@ -47,10 +47,17 @@ c.constants
 		nrconst := "+" nr | "-" nr | nr
 		nr := digit{nr}
 
-	2.character
+	2.floats rule:
+		floatconst := nr "." nr | "." nr
+		nr := digit{nr}
+
+	3. boolean rule:
+		boolconst := "true" | "false"
+
+	4.character
 		character:='letter'|'digit'
 
-	3.string
+	5.string
 		constchar := "string" | 'string'
 		string := char{string}
 		char := letter|digit
