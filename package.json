@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@types/node": "^20.8.9"
+  },
+  "scripts": {
+	"start": "node build/Main.js",
+	"build": "tsc"
+  }
+}

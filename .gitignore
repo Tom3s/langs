@@ -4,3 +4,5 @@ lab2/syntax_old.in
 lab2/token_old.in
 
 build
+
+node_modules/**/*

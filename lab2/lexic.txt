@@ -7,7 +7,7 @@ Lexic:
 
 a.Special symbols, representing:
 
-- operators + - * / ^ = < <= == >= && || !=
+- operators + - * / ^ = < <= == >= && || != !
 - separators [ ] { } ( ) : ; space newline
 - reserved words:
 	var

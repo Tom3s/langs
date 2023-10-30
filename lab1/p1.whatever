@@ -1,3 +1,4 @@
+// This is a comment
 var a: int = read().toInt()
 var b: int = read().toInt()
 var c: int = read().toInt()
@@ -5,7 +6,7 @@ var c: int = read().toInt()
 func gcd(a: int, b: int) -> int {
 	while a != b {
 		if a > b {
-			a = a - b
+			a = a - b // inline comment
 		} else {
 			b = b - a
 		}
