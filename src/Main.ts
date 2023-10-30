@@ -23,4 +23,5 @@ import SymbolTable from "./SymbolTable";
 
 // symbolTable.printAll();
 
-const lexer = new Lexer('./lab1/p1.whatever');
+const lexer = new Lexer('./lab1/p1.whatever', new SymbolTable(128));
+const lexer2 = new Lexer('./lab1/p1err.whatever', new SymbolTable(128));

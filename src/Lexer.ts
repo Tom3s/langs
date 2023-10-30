@@ -1,3 +1,4 @@
+import SymbolTable from "./SymbolTable";
 
 export enum Type {
 	Integer = 'Integer',
@@ -24,6 +25,7 @@ export class Lexer {
 	// private tokenList: Array<Token> = [];
 	constructor(
 		private fileName: string,
+		private symbolTable: SymbolTable,
 	) {
 		const fs = require('fs');
 		const contents = fs.readFileSync(fileName, 'utf8');
@@ -45,7 +47,11 @@ export class Lexer {
 		// const ignoredComments = this.ignoreComments(tokens);
 		const tokensWithJoinedStrings = this.joinStrings(tokens);
 
-		this.analyzeTokens(tokensWithJoinedStrings);
+		try {
+			this.analyzeTokens(tokensWithJoinedStrings);
+		} catch (error: any) {
+			console.log(error?.message);
+		}
 
 		this.printToFile("./lab1/p1.tokens", tokensWithJoinedStrings);
 	}
@@ -100,6 +106,7 @@ export class Lexer {
 				index++;
 			}
 		}
+		this.symbolTable.printAll();
 	}
 
 	validateDeclaration(constant: boolean, tokens: Array<string>, index: number): number {
@@ -113,6 +120,7 @@ export class Lexer {
 		}			
 		index++;
 		let type: Type = this.getType(tokens[index])
+		this.symbolTable.add(identifier, 0);
 		console.log("Found new declaration:", identifier, type, constant ? "Constant" : "Variable");
 		return ++index;
 	}
