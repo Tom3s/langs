@@ -6,6 +6,7 @@ export enum Type {
 	Boolean = 'Boolean',
 	Char = 'Char',
 	String = 'String',
+	Void = 'Void',
 }
 
 export const Types = {
@@ -14,6 +15,7 @@ export const Types = {
 	'bool': Type.Boolean,
 	'char': Type.Char,
 	'string': Type.String,
+	'void': Type.Void,
 } as any;
 
 export const CompoundTypes = [
@@ -40,7 +42,7 @@ export class Lexer {
 		const ignoredCommentsContent = contents.replace(/\/\/.*(\r\n|\r|\n)/g, "$1");
 		console.log(ignoredCommentsContent);
 
-		const tokens = ignoredCommentsContent.split(/([ \n\t\r.\":()\[\]{}])/).filter((token: string) => {
+		const tokens = ignoredCommentsContent.split(/([ \n\t\r.\":()\[\]{},])/).filter((token: string) => {
 			return token !== "" /*&& token !== " "*/ && token !== "\t" && token !== "\r";
 		})
 
@@ -102,11 +104,82 @@ export class Lexer {
 			let token = tokens[index];
 			if (token === "var" || token === "const") {
 				index = this.validateDeclaration(token === "const", tokens, index);
+			} else if (token === "=") {
+				index = this.validateAssignment(tokens, index);
+			} else if (token === "func") {
+				index = this.validateFunction(tokens, index);
 			} else {
 				index++;
 			}
 		}
 		this.symbolTable.printAll();
+	}
+
+	validateFunction(tokens: Array<string>, index: number): number {
+		// func gcd(a: int, b: int) -> int {
+		index++;
+		const identifier = tokens[index];
+		this.validateIdentifier(identifier);
+		index++;
+		if (tokens[index] !== "(") {
+			throw new Error("Expected '('");
+		}
+		index++;
+		const closingParenthesisIndex = tokens.indexOf(")", index);
+		const parameters = tokens.slice(index, closingParenthesisIndex);
+		const parameterList = this.validateParameters(parameters);
+		index = closingParenthesisIndex + 1;
+		if (tokens[index] !== "->") {
+			throw new Error("Expected '->' for return type");
+		}
+		index++;
+		const returnType = this.getType(tokens[index], true);
+		index++;
+		if (tokens[index] !== "{") {
+			throw new Error("Expected '{' for function body");
+		}
+
+		console.log("Found new function:", identifier, parameterList, "->", returnType);
+
+		return index;
+	}
+
+	validateParameters(tokens: Array<string>) {
+		let index = 0;
+		const parameters = [];
+		while (index < tokens.length) {
+			const argumentName = tokens[index];
+			this.validateIdentifier(argumentName);
+			index++;
+			if (tokens[index] !== ":") {
+				throw new Error("Expected ':' type in function parameter declaration");
+			}
+			index++;
+			const type = this.getType(tokens[index]);
+			index++;
+			if (index < tokens.length && tokens[index] !== ",") {
+				throw new Error("Expected ','");
+			}
+			parameters.push({ name: argumentName, type });
+			index++;
+		}
+		return parameters;
+	}
+
+
+	validateAssignment(tokens: Array<string>, index: number): number {
+		let identifier = tokens[index - 1];
+		if (Types[identifier] !== undefined) {
+			identifier = tokens[index - 3];
+		}
+		this.symbolTable.get(identifier);
+		return this.validateExpression(tokens, index + 1);
+	}
+
+	validateExpression(tokens: Array<string>, index: number): number {
+		const expressionEndIndex = tokens.indexOf("\n", index);
+		console.log("Expression:", tokens.slice(index, expressionEndIndex));
+		return expressionEndIndex + 1;
 	}
 
 	validateDeclaration(constant: boolean, tokens: Array<string>, index: number): number {
@@ -131,8 +204,12 @@ export class Lexer {
 		}
 	}
 
-	getType(token: string): Type {
-		if (Types[token] === null) {
+	getType(token: string, voidable: boolean = false): Type {
+		if (token === "void") {
+			if (!voidable) {
+				throw new Error("Void only allowed in return type");
+			}
+		} else if (Types[token] === null) {
 			throw new Error("Invalid type: " + token);
 		}
 		return Types[token];
