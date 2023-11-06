@@ -23,5 +23,20 @@ import SymbolTable from "./SymbolTable";
 
 // symbolTable.printAll();
 
-const lexer = new Lexer('./lab1/p1.whatever', new SymbolTable(128));
-// const lexer2 = new Lexer('./lab1/p1err.whatever', new SymbolTable(128));
+// const lexer = new Lexer('./lab1/p1.whatever', new SymbolTable(128));
+// const lexer1 = new Lexer('./lab1/p2.whatever', new SymbolTable(128));
+// const lexer2 = new Lexer('./lab1/p3.whatever', new SymbolTable(128));
+// const lexer3 = new Lexer('./lab1/p1err.whatever', new SymbolTable(128));
+
+const code = `
+    var: int
+    const: float
+    if (x == 10) {
+        // This is a comment
+        print("Hello, World!");
+    }
+`;
+
+const lexer = new Lexer('../lab1/p2.whatever');
+const tokens = lexer.tokenize();
+console.log(tokens);

@@ -1,217 +1,263 @@
-import SymbolTable from "./SymbolTable";
-
-export enum Type {
-	Integer = 'Integer',
-	Float = 'Float',
-	Boolean = 'Boolean',
-	Char = 'Char',
-	String = 'String',
-	Void = 'Void',
+class Token {
+    constructor(public type: string, public value: string) {}
 }
 
-export const Types = {
-	'int': Type.Integer,
-	'float': Type.Float,
-	'bool': Type.Boolean,
-	'char': Type.Char,
-	'string': Type.String,
-	'void': Type.Void,
-} as any;
-
-export const CompoundTypes = [
-	'list',
-	'dict',
-]
-
 export class Lexer {
-	// private tokenList: Array<Token> = [];
-	constructor(
-		private fileName: string,
-		private symbolTable: SymbolTable,
-	) {
+    private input: string;
+    private position: number = 0;
+    private currentChar: string | null = null;
+
+    // constructor(input: string) {
+	constructor(fileName: string){
 		const fs = require('fs');
-		const contents = fs.readFileSync(fileName, 'utf8');
+		const path = require('path');
+		const filePath = path.join(__dirname, fileName);
+		const input = fs.readFileSync(filePath, 'utf-8');
+		this.input = input;
+        this.currentChar = this.input[0];
+    }
 
-		this.tokenize(contents);
-	}
+    private nextChar(): string | null{
+        this.position++;
+        if (this.position < this.input.length) {
+            return this.input[this.position];
+        } else {
+            return null;
+        }
+    }
 
-	tokenize(contents: string) {
-		let position = 0;
-		// const tokens = []; 
+    private skipWhitespace() {
+        while (this.currentChar !== null && /\s/.test(this.currentChar) && !/\n/.test(this.currentChar) && !/\r/.test(this.currentChar)) {
+            this.currentChar = this.nextChar();
+        }
+    }
 
-		const ignoredCommentsContent = contents.replace(/\/\/.*(\r\n|\r|\n)/g, "$1");
-		console.log(ignoredCommentsContent);
+    private isAlpha(char: string) {
+        return /[a-zA-Z_]/.test(char);
+    }
 
-		const tokens = ignoredCommentsContent.split(/([ \n\t\r.\":()\[\]{},])/).filter((token: string) => {
-			return token !== "" /*&& token !== " "*/ && token !== "\t" && token !== "\r";
-		})
+    private isAlphanumeric(char: string) {
+        return /[a-zA-Z0-9_]/.test(char);
+    }
 
-		// const ignoredComments = this.ignoreComments(tokens);
-		const tokensWithJoinedStrings = this.joinStrings(tokens);
+    private getNextToken(): Token | null {
+        while (this.currentChar !== null) {
+			if (/\n/.test(this.currentChar) || /\r/.test(this.currentChar)) {
+				// Handle newline characters (CR, LF, or CRLF)
+				this.currentChar = this.nextChar();
+				return new Token('NEWLINE', '\n');
+			}
 
-		try {
-			this.analyzeTokens(tokensWithJoinedStrings);
-		} catch (error: any) {
-			console.log(error?.message);
-		}
+            if (/\s/.test(this.currentChar)) {
+                this.skipWhitespace();
+                continue;
+            }
 
-		this.printToFile("./lab1/p1.tokens", tokensWithJoinedStrings);
-	}
+            if (this.isAlpha(this.currentChar)) {
+                let value = '';
+                while (this.currentChar !== null && this.isAlphanumeric(this.currentChar)) {
+                    value += this.currentChar;
+                    this.currentChar = this.nextChar();
+                }
 
-	printToFile(outFile: string, wordList: Array<string>) {
-		const fs = require('fs');
-		fs.writeFileSync(outFile, wordList.map((token: string) => token === "\n" ? "\\n" : token).join("\n"));
-	}
-
-	joinStrings(tokens: Array<string>) {
-		let joinedTokens: Array<string> = [];
-		let stringStartIndex = -1;
-		let stringEndIndex = -1;
-		let lastIndex = 0;
-		let string = "";
-
-		for (let i = 0; i < tokens.length; i++) {
-			const token = tokens[i];
-			if (token === "\"") {
-				lastIndex = i;
-				if (stringStartIndex === -1) {
-					stringStartIndex = i + 1;
+                // Check for keywords or identifiers
+                if (value === 'var' || value === 'const') {
+                    return new Token('DECLARATION', value);
+                } else if (value === 'int' || value === 'float' || value === 'bool' || value === 'str' || value === 'list') {
+                    return new Token('TYPE', value);
+                } else if (value === 'if' || value === 'else' || value === 'while' || value === 'do' || value === 'for' || value === 'break' || value === 'continue' || value === 'return' || value === 'func') {
+                    return new Token('CONTROL', value);
+				} else if (value === 'print' || value === 'read' || value === 'readln') {
+					return new Token('IO', value);
+                } else if (value === 'true' || value === 'false') {
+					return new Token('BOOLEAN', value);
+				} else if (value === 'pi' || value === 'e' || value === 'null') {
+					return new Token('CONSTANT', value);
 				} else {
-					stringEndIndex = i - 1;
+                    return new Token('IDENTIFIER', value);
+                }
+            }
+
+			if (this.currentChar === '(') {
+				this.currentChar = this.nextChar();
+				return new Token('OPEN_PAREN', '(');
+			} else if (this.currentChar === ')') {
+				this.currentChar = this.nextChar();
+				return new Token('CLOSE_PAREN', ')');
+			} else if (this.currentChar === '{') {
+				this.currentChar = this.nextChar();
+				return new Token('OPEN_BRACE', '{');
+			} else if (this.currentChar === '}') {
+				this.currentChar = this.nextChar();
+				return new Token('CLOSE_BRACE', '}');
+			}
+
+            // Add more conditions for operators, numbers, strings, and other tokens.
+
+            // Example for '+':
+            if (this.currentChar === '+') {
+                this.currentChar = this.nextChar();
+                return new Token('OPERATOR', '+');
+            } else if (this.currentChar === '-') {
+				this.currentChar = this.nextChar();
+				return new Token('OPERATOR', '-');
+			} else if (this.currentChar === '*') {
+				this.currentChar = this.nextChar();
+				return new Token('OPERATOR', '*');
+			} else if (this.currentChar === '/') {
+				this.currentChar = this.nextChar();
+				return new Token('OPERATOR', '/');
+			} else if (this.currentChar === '%') {
+				this.currentChar = this.nextChar();
+				return new Token('OPERATOR', '%');
+			} else if (this.currentChar === '^') {
+				this.currentChar = this.nextChar();
+				return new Token('OPERATOR', '^');
+			} else if (this.currentChar === '=') {
+				if (this.input[this.position + 1] === '=') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '==');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '=');
+				}
+			} else if (this.currentChar === '>') {
+				if (this.input[this.position + 1] === '=') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '>=');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '>');
+				}
+			} else if (this.currentChar === '<') {
+				if (this.input[this.position + 1] === '=') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '<=');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '<');
+				}
+			} else if (this.currentChar === '!') {
+				if (this.input[this.position + 1] === '=') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '!=');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '!');
+				}
+			} else if (this.currentChar === '&') {
+				if (this.input[this.position + 1] === '&') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '&&');
+				} else {
+					throw new Error('Invalid operator: ' + this.currentChar);
+				}
+			} else if (this.currentChar === '|') {
+				if (this.input[this.position + 1] === '|') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('OPERATOR', '||');
+				} else {
+					throw new Error('Invalid operator: ' + this.currentChar);
 				}
 			}
 
-			if (stringStartIndex !== -1 && stringEndIndex !== -1) {
-				string = tokens.slice(stringStartIndex, stringEndIndex + 1).join("");
-				joinedTokens = joinedTokens.concat(tokens.slice(0, stringStartIndex));
-				joinedTokens.push(string);
-				// joinedTokens = joinedTokens.concat(tokens.slice(stringEndIndex + 1));
-				i = stringEndIndex + 1;
-				stringStartIndex = -1;
-				stringEndIndex = -1;
-				string = "";
+			// Handle numbers
+			if (/[0-9]/.test(this.currentChar)) {
+				let value = '';
+				while (this.currentChar !== null && /[0-9.]/.test(this.currentChar)) {
+					value += this.currentChar;
+					this.currentChar = this.nextChar();
+				}
+				return new Token('NUMBER', value);
+			}
+	
+			// Handle strings (double-quoted or single-quoted)
+			if (this.currentChar === '"' || this.currentChar === "'") {
+				const quoteChar = this.currentChar;
+				this.currentChar = this.nextChar();
+				let value = '';
+				while (this.currentChar !== null && this.currentChar !== quoteChar) {
+					value += this.currentChar;
+					this.currentChar = this.nextChar();
+				}
+				if (this.currentChar === quoteChar) {
+					this.currentChar = this.nextChar();
+					return new Token('STRING', quoteChar + value + quoteChar);
+				} else {
+					throw new Error('Unterminated string');
+				}
+			}
+            // Add more conditions for other operators, numbers, strings, and other tokens.
+
+			if (this.currentChar === ':') {
+				this.currentChar = this.nextChar();
+				return new Token('COLON', ':');
+			} else if (this.currentChar === '.') {
+				this.currentChar = this.nextChar();
+				return new Token('DOT', '.');
+			} else if (this.currentChar === ',') {
+				this.currentChar = this.nextChar();
+				return new Token('COMMA', ',');
+			} else if (this.currentChar === '?') {
+				this.currentChar = this.nextChar();
+				return new Token('QUESTION', '?');
+			// } else if (this.currentChar.test(/[\n\r]/)) {
+			} 
+
+            // Handle comments
+
+            if (this.currentChar === '/') {
+                this.currentChar = this.nextChar();
+                if (this.currentChar === '/') {
+                    // Single-line comment
+                    while (this.currentChar !== null && this.currentChar !== '\n') {
+                        this.currentChar = this.nextChar();
+                    }
+                } else if (this.currentChar === '*') {
+                    // Multi-line comment
+                    this.currentChar = this.nextChar();
+                    while (this.currentChar !== null) {
+                        if (this.currentChar === '*' && this.input[this.position + 1] === '/') {
+                            this.currentChar = this.nextChar();
+                            this.currentChar = this.nextChar();
+                            break;
+                        }
+                        this.currentChar = this.nextChar();
+                    }
+                }
+                continue; // Continue to the next token
+            }
+
+            // If none of the conditions match, throw an error or handle it as needed.
+
+            throw new Error('Invalid character: ' + this.currentChar);
+        }
+        return null;
+    }
+
+    public tokenize(): Token[] {
+        const tokens: Token[] = [];
+        let token = this.getNextToken();
+        while (token !== null) {
+            tokens.push(token);
+            token = this.getNextToken();
+        }
+		// delete consecutive newlines, and leave just one
+		for (let i = 0; i < tokens.length; i++) {
+			if (tokens[i].type === 'NEWLINE') {
+				while (tokens[i + 1] && tokens[i + 1].type === 'NEWLINE') {
+					tokens.splice(i + 1, 1);
+				}
 			}
 		}
-
-		joinedTokens = joinedTokens.concat(tokens.indexOf("\"", lastIndex) === -1 ? tokens : tokens.slice(tokens.indexOf("\"", lastIndex)));
-
-		return joinedTokens.filter((token: string) => token !== " ");
-	}
-
-	analyzeTokens(tokens: Array<string>) {
-		let index = 0;
-		while (index < tokens.length) {
-			let token = tokens[index];
-			if (token === "var" || token === "const") {
-				index = this.validateDeclaration(token === "const", tokens, index);
-			} else if (token === "=") {
-				index = this.validateAssignment(tokens, index);
-			} else if (token === "func") {
-				index = this.validateFunction(tokens, index);
-			} else {
-				index++;
-			}
-		}
-		this.symbolTable.printAll();
-	}
-
-	validateFunction(tokens: Array<string>, index: number): number {
-		// func gcd(a: int, b: int) -> int {
-		index++;
-		const identifier = tokens[index];
-		this.validateIdentifier(identifier);
-		index++;
-		if (tokens[index] !== "(") {
-			throw new Error("Expected '('");
-		}
-		index++;
-		const closingParenthesisIndex = tokens.indexOf(")", index);
-		const parameters = tokens.slice(index, closingParenthesisIndex);
-		const parameterList = this.validateParameters(parameters);
-		index = closingParenthesisIndex + 1;
-		if (tokens[index] !== "->") {
-			throw new Error("Expected '->' for return type");
-		}
-		index++;
-		const returnType = this.getType(tokens[index], true);
-		index++;
-		if (tokens[index] !== "{") {
-			throw new Error("Expected '{' for function body");
-		}
-
-		console.log("Found new function:", identifier, parameterList, "->", returnType);
-
-		return index;
-	}
-
-	validateParameters(tokens: Array<string>) {
-		let index = 0;
-		const parameters = [];
-		while (index < tokens.length) {
-			const argumentName = tokens[index];
-			this.validateIdentifier(argumentName);
-			index++;
-			if (tokens[index] !== ":") {
-				throw new Error("Expected ':' type in function parameter declaration");
-			}
-			index++;
-			const type = this.getType(tokens[index]);
-			index++;
-			if (index < tokens.length && tokens[index] !== ",") {
-				throw new Error("Expected ','");
-			}
-			parameters.push({ name: argumentName, type });
-			index++;
-		}
-		return parameters;
-	}
-
-
-	validateAssignment(tokens: Array<string>, index: number): number {
-		let identifier = tokens[index - 1];
-		if (Types[identifier] !== undefined) {
-			identifier = tokens[index - 3];
-		}
-		this.symbolTable.get(identifier);
-		return this.validateExpression(tokens, index + 1);
-	}
-
-	validateExpression(tokens: Array<string>, index: number): number {
-		const expressionEndIndex = tokens.indexOf("\n", index);
-		console.log("Expression:", tokens.slice(index, expressionEndIndex));
-		return expressionEndIndex + 1;
-	}
-
-	validateDeclaration(constant: boolean, tokens: Array<string>, index: number): number {
-		let token;// = tokens[index];
-		index++;
-		const identifier = tokens[index];
-		this.validateIdentifier(identifier);
-		index++;
-		if (tokens[index] !== ":") {
-			throw new Error("Expected ':'");
-		}			
-		index++;
-		let type: Type = this.getType(tokens[index])
-		this.symbolTable.add(identifier, 0);
-		console.log("Found new declaration:", identifier, type, constant ? "Constant" : "Variable");
-		return ++index;
-	}
-
-	validateIdentifier(token: string) {
-		if (!token.match(/^[a-zA-Z0-9]*[a-zA-Z][a-zA-Z0-9]*$/)) {
-			throw new Error("Invalid identifier: " + token);
-		}
-	}
-
-	getType(token: string, voidable: boolean = false): Type {
-		if (token === "void") {
-			if (!voidable) {
-				throw new Error("Void only allowed in return type");
-			}
-		} else if (Types[token] === null) {
-			throw new Error("Invalid type: " + token);
-		}
-		return Types[token];
-	}
+        return tokens;
+    }
 }
+
+
