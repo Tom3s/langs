@@ -13,13 +13,13 @@ export class WhileStatement implements Statement {
 	execute(programState: ProgramState): ProgramState | null {
 		const symbolTable = programState.symbolTable;
 		var evaluatedCondition = this.condition.evaluate(symbolTable);
-		if (evaluatedCondition.getType().equals(new BooleanType())) {
-			throw new Error(`Condition ${this.condition.toString()} is not a boolean`);
+		if (!evaluatedCondition.getType().equals(new BooleanType())) {
+			throw new Error(`Condition ${this.condition.toString()} is not a boolean (got ${evaluatedCondition.getType()})`);
 		}
 
 		var conditionValue = evaluatedCondition.body;
 
-		if (conditionValue) {
+		if (conditionValue === true) {
 			programState.executionStack.push(this);
 			programState.executionStack.push(this.body);
 		}
@@ -41,6 +41,6 @@ export class WhileStatement implements Statement {
 	}
 
 	toString(): string {
-		return `while ${this.condition.toString()} \{\n${this.body.toString()}\n\}\n`;
+		return `while ${this.condition.toString()} {\n\t${this.body.toString()}\n}\n`;
 	}
 }

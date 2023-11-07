@@ -25,6 +25,6 @@ export class CompoundStatement implements Statement {
 	}
 
 	toString(): string {
-		return "{\n" + this.statements.map(statement => statement.toString()).join("\n") + "}\n";
+		return this.statements.map(statement => statement.toString()).join("\n");
 	}
 }

@@ -26,18 +26,18 @@ export class ArithmeticExpression implements Expression {
 	evaluate(symbolTable: SymbolTable): Value {
 		const leftValue: Value = this.left.evaluate(symbolTable);
 		if (
-			!leftValue.getType().equals(new IntegerType()) ||
+			!leftValue.getType().equals(new IntegerType()) &&
 			!leftValue.getType().equals(new FloatType())
 		) {
-			throw new Error("Left operand must be a number.");
+			throw new Error(`Left operand ${this.left.toString()} must be a number.`); // TODO: Make this error message more specific
 		}
 
 		const rightValue: Value = this.right.evaluate(symbolTable);
 		if (
-			!rightValue.getType().equals(new IntegerType()) ||
+			!rightValue.getType().equals(new IntegerType()) &&
 			!rightValue.getType().equals(new FloatType())
 		) {
-			throw new Error("Right operand must be a number.");
+			throw new Error(`Right operand ${this.left.toString()} must be a number.`); // TODO: Make this error message more specific
 		}
 
 		const leftNumber: number = leftValue.body;
@@ -89,7 +89,7 @@ export class ArithmeticExpression implements Expression {
 			!leftType.equals(new IntegerType()) ||
 			!leftType.equals(new FloatType())
 		) {
-			throw new Error("Left operand must be a number.");
+			throw new Error("Left operand must be a number.")
 		}
 
 		var rightType: Type = this.right.typeCheck(typeEnvironment);

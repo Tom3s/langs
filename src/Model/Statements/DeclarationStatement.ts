@@ -13,9 +13,9 @@ export class DeclarationStatement implements Statement {
 	) { }
 
 	execute(programState: ProgramState): ProgramState | null {
-		const symbolTable = programState.symbolTable;
+		// const symbolTable = programState.symbolTable;
 
-		if (symbolTable.has(this.name)) {
+		if (programState.symbolTable.has(this.name)) {
 			throw new Error(`Variable ${this.name} already declared`);
 		}
 
@@ -23,11 +23,13 @@ export class DeclarationStatement implements Statement {
 			throw new Error(`Constant ${this.name} must be initialized`);
 		} 
 
+		console.log(`Declaring ${this.name} as ${this.type.toString()}`)
+
 		if (this.value === null) {
-			symbolTable.set(this.name, this.type.defaultValue());
+			programState.symbolTable.add(this.name, this.type.defaultValue());
 		} else {
-			const value = this.value.evaluate(symbolTable);
-			symbolTable.set(this.name, value);
+			const value = this.value.evaluate(programState.symbolTable);
+			programState.symbolTable.add(this.name, value);
 		}
 
 		return null;

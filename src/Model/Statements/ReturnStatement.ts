@@ -10,6 +10,7 @@ export class ReturnStatement implements Statement {
 
 	execute(programState: ProgramState): ProgramState | null {
 		// TODO: Implement
+		programState.executionStack.push(this);
 		return programState;
 	}
 

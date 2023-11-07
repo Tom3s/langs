@@ -56,7 +56,7 @@ export default class HashTable<T> {
 			index++;
 		}
 		if (index === this.fullSize) {
-			throw new Error('Key not found');
+			throw new Error(`Key ${key} not found when removing`);
 		}
 
 		this.keys[index] = undefined;
@@ -68,7 +68,7 @@ export default class HashTable<T> {
 			index++;
 		}
 		if (index === this.fullSize) {
-			throw new Error('Key not found');
+			throw new Error(`Key ${key} not found when getting`);
 		}
 		return this.values[index];
 	}	
@@ -92,7 +92,12 @@ export default class HashTable<T> {
 	}
 
 	has(key: string): boolean {
-		return this.get(key) !== undefined;
+		try {
+			this.get(key) !== undefined;
+			return true;
+		} catch (error: any) {
+			return false;
+		}
 	}
 
 	set(key: string, value: T): void {
@@ -101,10 +106,21 @@ export default class HashTable<T> {
 			index++;
 		}
 		if (index === this.fullSize) {
-			throw new Error('Key not found');
+			throw new Error(`Key ${key} not found when setting`);
 		}
 
 		// this.keys[index] = key;
 		this.values[index] = value;
+	}
+
+	getKeys(): string[] {
+		const keys: string[] = [];
+		for (let i = 0; i < this.fullSize; i++) {
+			const key = this.keys[i];
+			if (key !== undefined) {
+				keys.push(key);
+			}
+		}
+		return keys;
 	}
 };

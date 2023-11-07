@@ -35,4 +35,8 @@ export default class SymbolTable {
 	set(key: string, value: Value): void {
 		this.hashTable.set(key, value);
 	}
+
+	getKeys(): string[] {
+		return this.hashTable.getKeys();
+	}
 }

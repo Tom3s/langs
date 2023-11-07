@@ -1,7 +1,6 @@
 import { Expression } from "../Expressions/Expression";
 import { ProgramState } from "../ProgramState";
 import { Type } from "../Types/Type";
-import { Value } from "../Values/Value";
 import { Statement } from "./Statement";
 
 export class AssignStatement implements Statement {

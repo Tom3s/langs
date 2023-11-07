@@ -22,7 +22,7 @@ export class FunctionDeclarationStatement implements Statement {
 			throw new Error(`Function ${this.name} already declared`);
 		}
 
-		symbolTable.set(
+		symbolTable.add(
 			this.name,
 			new FunctionValue(
 				this.returnType,
@@ -41,7 +41,7 @@ export class FunctionDeclarationStatement implements Statement {
 	}
 
 	toString(): string {
-		return `func ${this.name}(${this.parameters.map(parameter => parameter.toString()).join(", ")}) -> ${this.returnType.toString()} ${this.body.toString()}`;
+		return `func ${this.name}(${this.parameters.map(parameter => parameter.toString()).join(", ")}) -> ${this.returnType.toString()} {\n\t${this.body.toString()}\n}`;
 	}
 
 	deepCopy(): Statement {

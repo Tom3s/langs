@@ -37,14 +37,14 @@ export class RelationalExpression implements Expression {
 		}
 
 		if (
-			!leftValue.getType().equals(new IntegerType()) ||
+			!leftValue.getType().equals(new IntegerType()) &&
 			!leftValue.getType().equals(new FloatType())
 		) {
 			throw new Error(`Left operand of type ${leftValue.getType()} cannot be used in a relational expression of type ${this.operator}.`);
 		}
 
 		if (
-			!rightValue.getType().equals(new IntegerType()) ||
+			!rightValue.getType().equals(new IntegerType()) &&
 			!rightValue.getType().equals(new FloatType())
 		) {
 			throw new Error(`Right operand of type ${rightValue.getType()} cannot be used in a relational expression of type ${this.operator}.`);
@@ -71,7 +71,7 @@ export class RelationalExpression implements Expression {
 		const leftType: Type = this.left.typeCheck(typeEnvironment);
 		
 		if (
-			!leftType.equals(new IntegerType()) ||
+			!leftType.equals(new IntegerType()) &&
 			!leftType.equals(new FloatType())
 			) {
 			throw new Error(`Left operand of type ${leftType} cannot be used in a relational expression of type ${this.operator}.`);
@@ -79,7 +79,7 @@ export class RelationalExpression implements Expression {
 		
 		const rightType: Type = this.right.typeCheck(typeEnvironment);
 		if (
-			!rightType.equals(new IntegerType()) ||
+			!rightType.equals(new IntegerType()) &&
 			!rightType.equals(new FloatType())
 		) {
 			throw new Error(`Right operand of type ${rightType} cannot be used in a relational expression of type ${this.operator}.`);

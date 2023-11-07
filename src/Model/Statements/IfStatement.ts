@@ -18,7 +18,7 @@ export class IfStatement implements Statement {
 			throw new Error(`Condition ${this.condition.toString()} is not a boolean`);
 		}
 
-		if (conditionValue) {
+		if (conditionValue.body === true) {
 			programState.executionStack.push(this.trueBranch);
 		} else if (this.falseBranch !== null) {
 			programState.executionStack.push(this.falseBranch);
@@ -46,11 +46,11 @@ export class IfStatement implements Statement {
 	}
 
 	toString(): string {
-		let ret = `if ${this.condition.toString()} {\n`;
+		let ret = `if ${this.condition.toString()} {\n\t`;
 		ret += this.trueBranch.toString();
 		ret += "\n}";
 		if (this.falseBranch !== null) {
-			ret += " else {\n";
+			ret += " else {\n\t";
 			ret += this.falseBranch.toString();
 			ret += "\n}";
 		}
