@@ -1,4 +1,4 @@
-class Token {
+export class Token {
     constructor(public type: string, public value: string) {}
 }
 
@@ -13,7 +13,8 @@ export class Lexer {
 		const path = require('path');
 		const filePath = path.join(__dirname, fileName);
 		const input = fs.readFileSync(filePath, 'utf-8');
-		this.input = input;
+
+		this.input = input.replace(/\r\n/g, '\n');
         this.currentChar = this.input[0];
     }
 
@@ -249,13 +250,16 @@ export class Lexer {
             token = this.getNextToken();
         }
 		// delete consecutive newlines, and leave just one
-		for (let i = 0; i < tokens.length; i++) {
-			if (tokens[i].type === 'NEWLINE') {
-				while (tokens[i + 1] && tokens[i + 1].type === 'NEWLINE') {
-					tokens.splice(i + 1, 1);
-				}
-			}
-		}
+		// for (let i = 0; i < tokens.length; i++) {
+		// 	if (tokens[i].type === 'NEWLINE') {
+		// 		while (tokens[i + 1] && tokens[i + 1].type === 'NEWLINE') {
+		// 			tokens.splice(i + 1, 1);
+		// 		}
+		// 	}
+		// }
+
+		console.log(tokens);
+
         return tokens;
     }
 }

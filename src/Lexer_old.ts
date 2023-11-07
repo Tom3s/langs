@@ -1,4 +1,4 @@
-import SymbolTable from "./SymbolTable";
+import SymbolTable from "./Model/ADT/SymbolTable";
 
 export enum Type {
 	Integer = 'Integer',

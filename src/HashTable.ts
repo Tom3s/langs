@@ -1,11 +1,11 @@
-export default class HashTable {
+export default class HashTable<T> {
 	private keys: [string | undefined];
-	private values: [string | number | undefined];
+	private values: [T | undefined];
 	private fullSize: number;
 
 	constructor(size: number) {
 		this.keys = new Array(size) as [string | undefined];
-		this.values = new Array(size) as [string | undefined];
+		this.values = new Array(size) as [T | undefined];
 		this.fullSize = size;
 	}
 
@@ -14,7 +14,7 @@ export default class HashTable {
 		const oldKeys = this.keys;
 		const oldValues = this.values;
 		this.keys = new Array(this.fullSize) as [string | undefined];
-		this.values = new Array(this.fullSize) as [string | number | undefined];
+		this.values = new Array(this.fullSize) as [T | undefined];
 		for (let i = 0; i < oldKeys.length; i++) {
 			const key = oldKeys[i];
 			const value = oldValues[i];
@@ -32,7 +32,7 @@ export default class HashTable {
 		return hash % this.fullSize;
 	}
 
-	add(key: string, value: string | number): void {
+	add(key: string, value: T): void {
 		let index = this.hash(key);
 		while (this.keys[index] !== undefined) {
 			if (this.keys[index] === key) {
@@ -62,7 +62,7 @@ export default class HashTable {
 		this.keys[index] = undefined;
 	}
 
-	get(key: string): string | number | undefined {
+	get(key: string): T | undefined {
 		let index = this.hash(key);
 		while (index < this.fullSize && this.keys[index] !== key) {
 			index++;
@@ -89,5 +89,22 @@ export default class HashTable {
 				console.log(`${i}: ${this.keys[i]} -> ${this.values[i]}`);
 			}
 		}
+	}
+
+	has(key: string): boolean {
+		return this.get(key) !== undefined;
+	}
+
+	set(key: string, value: T): void {
+		let index = this.hash(key);
+		while (index < this.fullSize && this.keys[index] !== key) {
+			index++;
+		}
+		if (index === this.fullSize) {
+			throw new Error('Key not found');
+		}
+
+		// this.keys[index] = key;
+		this.values[index] = value;
 	}
 };
