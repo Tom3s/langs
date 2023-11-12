@@ -1,7 +1,9 @@
 import { Token } from './Lexer';
 import { ArithmeticExpression, ArithmeticOperator } from './Model/Expressions/ArithmeticExpression';
 import { Expression } from './Model/Expressions/Expression';
+import { FunctionCallExpression } from './Model/Expressions/FunctionCallExpression';
 import { MethodCallExpression } from './Model/Expressions/MethodCallExpression';
+import { NOPExpression } from './Model/Expressions/NOPExpression';
 import { ReadExpression } from './Model/Expressions/ReadExpression';
 import { RelationalExpression, RelationalOperator } from './Model/Expressions/RelationalExpression';
 import { ValueExpression } from './Model/Expressions/ValueExpression';
@@ -12,6 +14,7 @@ import { DeclarationStatement } from './Model/Statements/DeclarationStatement';
 import { FunctionDeclarationStatement } from './Model/Statements/FunctionDeclarationStatement';
 import { IfStatement } from './Model/Statements/IfStatement';
 import { PrintStatement } from './Model/Statements/PrintStatement';
+import { ReturnStatement } from './Model/Statements/ReturnStatement';
 import { Statement } from './Model/Statements/Statement';
 import { WhileStatement } from './Model/Statements/WhileStatement';
 import { BooleanType } from './Model/Types/BooleanType';
@@ -21,11 +24,13 @@ import { StringType } from './Model/Types/StringType';
 import { Type } from './Model/Types/Type';
 import { FloatValue } from './Model/Values/FloatValue';
 import { IntegerValue } from './Model/Values/IntegerValue';
+import { StringValue } from './Model/Values/StringValue';
 
 export class Parser {
 	private tokens: Token[];
 	private currentTokenIndex: number = 0;
 	private statements: Statement[] = [];
+	private parentheses: number = 0;
 
 	constructor(tokens: Token[]) {
 		this.tokens = tokens;
@@ -89,8 +94,19 @@ export class Parser {
 			return this.parseWhile();
 		} else if (controlType === 'if') {
 			return this.parseIf();
+		} else if (controlType === 'return') {
+			return this.parseReturn();
 		}
 		throw new Error(`Invalid control token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
+	}
+
+	private parseReturn(): Statement {
+		this.currentTokenIndex++;
+		if (this.match('NEWLINE')) {
+			return new ReturnStatement(null);
+		}
+		const expression = this.parseExpression();
+		return new ReturnStatement(expression);
 	}
 
 	private parseIf(): Statement {
@@ -231,7 +247,7 @@ export class Parser {
 				new DeclarationStatement(parameterIdentifier, parameterType, false)
 			);
 			this.currentTokenIndex++;
-			
+
 			if (this.tokens[this.currentTokenIndex].value === ')') {
 				break;
 			} else if (this.tokens[this.currentTokenIndex].value !== ',') {
@@ -320,18 +336,19 @@ export class Parser {
 			if (!this.match('OPEN_PAREN')) {
 				throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
 			}
-			let paren = 1;
+			// let paren = 1;
+			this.parentheses++;
 			this.currentTokenIndex++;
 			const expressionList = [];
-			while (paren) {
+			while (this.parentheses) {
 				expressionList.push(this.parseExpression());
 				if (this.match('COMMA')) {
 					this.currentTokenIndex++;
 				}
 				if (this.match('CLOSE_PAREN')) {
-					paren--;
+					this.parentheses--;
 				} else if (this.match('OPEN_PAREN')) {
-					paren++;
+					this.parentheses++;
 				}
 			}
 			this.currentTokenIndex++;
@@ -343,8 +360,8 @@ export class Parser {
 	}
 
 	private parseExpression(): Expression {
-		const nextNewLine = this.tokens.find((token, index) => 
-			(token.type === 'NEWLINE' || token.type === 'OPEN_BRACE') 
+		const nextNewLine = this.tokens.find((token, index) =>
+			(token.type === 'NEWLINE' || token.type === 'OPEN_BRACE')
 			&& index > this.currentTokenIndex
 		)
 		if (nextNewLine === undefined) {
@@ -372,11 +389,13 @@ export class Parser {
 				if (expressionTokens[expressionIndex].type !== 'OPEN_PAREN') {
 					throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
 				}
+				this.parentheses++;
 
 				expressionIndex++;
 				if (expressionTokens[expressionIndex].type !== 'CLOSE_PAREN') {
 					throw new Error(`Expected ) at index ${this.currentTokenIndex}.`);
 				}
+				this.parentheses--;
 
 				expressions.push(
 					new ReadExpression()
@@ -408,19 +427,21 @@ export class Parser {
 				if (expressionTokens[expressionIndex].type !== 'OPEN_PAREN') {
 					throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
 				}
+				this.parentheses++;
 				expressionIndex++;
-				let paren = 1;
+				// let paren = 1;
 				const expressionList = [];
-				while (paren) {
+				while (this.parentheses) {
 					if (expressionTokens[expressionIndex].type === 'CLOSE_PAREN') {
-						paren--;
-						if (paren === 0) {
+						this.parentheses--;
+						if (this.parentheses === 0) {
 							break;
 						}
 					} else if (expressionTokens[expressionIndex].type === 'OPEN_PAREN') {
-						paren++;
+						this.parentheses++;
 					}
-					expressionList.push(this.parsePartialExpression(expressionTokens, expressionIndex));
+					this.currentTokenIndex += expressionIndex;
+					expressionList.push(this.parseExpression());
 					if (expressionTokens[expressionIndex].type === 'COMMA') {
 						expressionIndex++;
 					}
@@ -433,9 +454,45 @@ export class Parser {
 					new MethodCallExpression(
 						methodObject,
 						methodIdentifier.value,
-						expressionList
+						expressionList.filter(expression => expression instanceof NOPExpression)
 					)
 				);
+				expressionIndex++;
+
+			} else if (expressionTokens[expressionIndex].type === 'OPEN_PAREN') {
+				expressionIndex++;
+				this.parentheses++;
+				// let paren = 1;
+				const expressionList = [];
+				while (this.parentheses) {
+					if (expressionTokens[expressionIndex].type === 'CLOSE_PAREN') {
+						this.parentheses--;
+						if (this.parentheses === 0) {
+							break;
+						}
+					} else if (expressionTokens[expressionIndex].type === 'OPEN_PAREN') {
+						this.parentheses++;
+					}
+					this.currentTokenIndex += expressionIndex + 1;
+					expressionList.push(this.parseExpression());
+					if (expressionTokens[expressionIndex].type === 'COMMA') {
+						expressionIndex++;
+					}
+				}
+				const identifier = expressions.pop();
+				if (identifier === undefined) {
+					throw new Error('Expected identifier.');
+				}
+				expressions.push(
+					new FunctionCallExpression(
+						(identifier as VariableExpression).identifier,
+						expressionList.filter(expression => expression instanceof NOPExpression)
+					)
+				);
+				expressionIndex++;
+
+			} else if (expressionTokens[expressionIndex].type === 'CLOSE_PAREN') {
+				this.parentheses--;
 				expressionIndex++;
 			} else if (expressionTokens[expressionIndex].type === 'RELATIONAL_OPERATOR') {
 				const operator = expressionTokens[expressionIndex].value;
@@ -444,7 +501,7 @@ export class Parser {
 				if (left === undefined) {
 					throw new Error('Expected left operand.');
 				}
-                this.currentTokenIndex += expressionIndex;
+				this.currentTokenIndex += expressionIndex;
 				const right = this.parseExpression();
 				expressions.push(
 					new RelationalExpression(
@@ -460,7 +517,7 @@ export class Parser {
 				if (left === undefined) {
 					throw new Error('Expected left operand.');
 				}
-                this.currentTokenIndex += expressionIndex;
+				this.currentTokenIndex += expressionIndex;
 				const right = this.parseExpression();
 				expressions.push(
 					new ArithmeticExpression(
@@ -469,15 +526,31 @@ export class Parser {
 						operator as ArithmeticOperator
 					)
 				);
+			} else if (expressionTokens[expressionIndex].type === 'STRING') {
+				const value: string = expressionTokens[expressionIndex].value as string;
+				expressions.push(
+					new ValueExpression(
+						new StringValue(
+							value.substring(1, value.length - 1)
+						)
+					)
+				);
+				expressionIndex++;
+			} else if (expressionTokens[expressionIndex].type === 'COMMA') {
+				this.currentTokenIndex += expressionIndex;
+				return expressions[0];
 			}
 		}
 		this.currentTokenIndex = newLineIndex + 1;
-		// while (this.match('NEWLINE')) {
-		// 	this.currentTokenIndex++;
-		// }
+
 		if (this.tokens[newLineIndex].type === 'OPEN_BRACE') {
 			this.currentTokenIndex = newLineIndex;
 		}
+
+		if (expressions.length === 0) {
+			return new NOPExpression();
+		}
+
 		return expressions[0];
 
 		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
@@ -493,7 +566,7 @@ export class Parser {
 	// 	if (!this.match('OPEN_PAREN')) {
 	// 		throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
 	// 	}
-	// 	let paren = 1;
+	// 	// let paren = 1;
 	// 	this.currentTokenIndex++;
 	// 	const expressionList = [];
 	// 	while (paren) {
