@@ -1,4 +1,3 @@
-// This is a comment
 var a: int = read().toInt()
 var b: int = read().toInt()
 var c: int = read().toInt()

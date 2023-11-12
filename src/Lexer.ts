@@ -98,63 +98,69 @@ export class Lexer {
             // Example for '+':
             if (this.currentChar === '+') {
                 this.currentChar = this.nextChar();
-                return new Token('OPERATOR', '+');
+                return new Token('ARITHMETIC_OPERATOR', '+');
             } else if (this.currentChar === '-') {
-				this.currentChar = this.nextChar();
-				return new Token('OPERATOR', '-');
+				if (this.input[this.position + 1] === '>') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('ARROW', '->');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('ARITHMETIC_OPERATOR', '-');
+				}
 			} else if (this.currentChar === '*') {
 				this.currentChar = this.nextChar();
-				return new Token('OPERATOR', '*');
+				return new Token('ARITHMETIC_OPERATOR', '*');
 			} else if (this.currentChar === '/') {
 				this.currentChar = this.nextChar();
-				return new Token('OPERATOR', '/');
+				return new Token('ARITHMETIC_OPERATOR', '/');
 			} else if (this.currentChar === '%') {
 				this.currentChar = this.nextChar();
-				return new Token('OPERATOR', '%');
+				return new Token('ARITHMETIC_OPERATOR', '%');
 			} else if (this.currentChar === '^') {
 				this.currentChar = this.nextChar();
-				return new Token('OPERATOR', '^');
+				return new Token('ARITHMETIC_OPERATOR', '^');
 			} else if (this.currentChar === '=') {
 				if (this.input[this.position + 1] === '=') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '==');
+					return new Token('RELATIONAL_OPERATOR', '==');
 				} else {
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '=');
+					return new Token('ASSIGN', '=');
 				}
 			} else if (this.currentChar === '>') {
 				if (this.input[this.position + 1] === '=') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '>=');
+					return new Token('RELATIONAL_OPERATOR', '>=');
 				} else {
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '>');
+					return new Token('RELATIONAL_OPERATOR', '>');
 				}
 			} else if (this.currentChar === '<') {
 				if (this.input[this.position + 1] === '=') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '<=');
+					return new Token('RELATIONAL_OPERATOR', '<=');
 				} else {
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '<');
+					return new Token('RELATIONAL_OPERATOR', '<');
 				}
 			} else if (this.currentChar === '!') {
 				if (this.input[this.position + 1] === '=') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '!=');
+					return new Token('RELATIONAL_OPERATOR', '!=');
 				} else {
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '!');
+					return new Token('RELATIONAL_OPERATOR', '!');
 				}
 			} else if (this.currentChar === '&') {
 				if (this.input[this.position + 1] === '&') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '&&');
+					return new Token('RELATIONAL_OPERATOR', '&&');
 				} else {
 					throw new Error('Invalid operator: ' + this.currentChar);
 				}
@@ -162,7 +168,7 @@ export class Lexer {
 				if (this.input[this.position + 1] === '|') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
-					return new Token('OPERATOR', '||');
+					return new Token('RELATIONAL_OPERATOR', '||');
 				} else {
 					throw new Error('Invalid operator: ' + this.currentChar);
 				}
