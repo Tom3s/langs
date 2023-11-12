@@ -1,10 +1,12 @@
 import { Token } from './Lexer';
+import { ArithmeticExpression, ArithmeticOperator } from './Model/Expressions/ArithmeticExpression';
 import { Expression } from './Model/Expressions/Expression';
 import { MethodCallExpression } from './Model/Expressions/MethodCallExpression';
 import { ReadExpression } from './Model/Expressions/ReadExpression';
 import { RelationalExpression, RelationalOperator } from './Model/Expressions/RelationalExpression';
 import { ValueExpression } from './Model/Expressions/ValueExpression';
 import { VariableExpression } from './Model/Expressions/VariableExpression';
+import { AssignStatement } from './Model/Statements/AssignStatement';
 import { CompoundStatement } from './Model/Statements/CompoundStatement';
 import { DeclarationStatement } from './Model/Statements/DeclarationStatement';
 import { FunctionDeclarationStatement } from './Model/Statements/FunctionDeclarationStatement';
@@ -47,15 +49,34 @@ export class Parser {
 
 	// Example parsing method for statements
 	private parseStatement(): Statement {
-		if (this.match('NEWLINE')) {
+		// if (this.match('NEWLINE')) {
+		// 	this.currentTokenIndex++;
+		// 	return this.parseStatement();
+		while (this.match('NEWLINE')) {
 			this.currentTokenIndex++;
-			return this.parseStatement();
-		} else if (this.match('DECLARATION')) {
+		}
+		if (this.match('DECLARATION')) {
 			return this.parseDeclaration();
 		} else if (this.match('IO')) {
 			return this.parsePrint();
 		} else if (this.match('CONTROL')) {
 			return this.parseControl();
+		} else if (this.match('IDENTIFIER')) {
+			return this.parseIdentifierStatement();
+		}
+		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
+	}
+
+	private parseIdentifierStatement(): Statement {
+		const identifier = this.tokens[this.currentTokenIndex];
+		this.currentTokenIndex++;
+		if (this.match('ASSIGN')) {
+			this.currentTokenIndex++;
+			const expression = this.parseExpression();
+			return new AssignStatement(
+				identifier.value,
+				expression
+			);
 		}
 		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 	}
@@ -134,7 +155,7 @@ export class Parser {
 			elseBody.push(this.parseStatement());
 		}
 
-		this.currentTokenIndex = closeBraceIndex + 1;
+		this.currentTokenIndex = closeBraceIndex + 2;
 
 		return new IfStatement(
 			condition,
@@ -169,7 +190,7 @@ export class Parser {
 		while (this.currentTokenIndex < closeBraceIndex) {
 			body.push(this.parseStatement());
 		}
-		this.currentTokenIndex = closeBraceIndex + 1;
+		this.currentTokenIndex = closeBraceIndex + 2;
 		return new WhileStatement(
 			condition,
 			new CompoundStatement(body)
@@ -260,7 +281,7 @@ export class Parser {
 			body.push(this.parseStatement());
 		}
 
-		this.currentTokenIndex = closeBraceIndex + 1;
+		this.currentTokenIndex = closeBraceIndex + 2;
 
 
 		return new FunctionDeclarationStatement(
@@ -430,6 +451,22 @@ export class Parser {
 						left,
 						right,
 						operator as RelationalOperator
+					)
+				);
+			} else if (expressionTokens[expressionIndex].type === 'ARITHMETIC_OPERATOR') {
+				const operator = expressionTokens[expressionIndex].value;
+				expressionIndex++;
+				const left = expressions.pop();
+				if (left === undefined) {
+					throw new Error('Expected left operand.');
+				}
+                this.currentTokenIndex += expressionIndex;
+				const right = this.parseExpression();
+				expressions.push(
+					new ArithmeticExpression(
+						left,
+						right,
+						operator as ArithmeticOperator
 					)
 				);
 			}
