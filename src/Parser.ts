@@ -2,13 +2,16 @@ import { Token } from './Lexer';
 import { Expression } from './Model/Expressions/Expression';
 import { MethodCallExpression } from './Model/Expressions/MethodCallExpression';
 import { ReadExpression } from './Model/Expressions/ReadExpression';
+import { RelationalExpression, RelationalOperator } from './Model/Expressions/RelationalExpression';
 import { ValueExpression } from './Model/Expressions/ValueExpression';
 import { VariableExpression } from './Model/Expressions/VariableExpression';
 import { CompoundStatement } from './Model/Statements/CompoundStatement';
 import { DeclarationStatement } from './Model/Statements/DeclarationStatement';
 import { FunctionDeclarationStatement } from './Model/Statements/FunctionDeclarationStatement';
+import { IfStatement } from './Model/Statements/IfStatement';
 import { PrintStatement } from './Model/Statements/PrintStatement';
 import { Statement } from './Model/Statements/Statement';
+import { WhileStatement } from './Model/Statements/WhileStatement';
 import { BooleanType } from './Model/Types/BooleanType';
 import { FloatType } from './Model/Types/FloatType';
 import { IntegerType } from './Model/Types/IntegerType';
@@ -61,8 +64,116 @@ export class Parser {
 		const controlType = this.tokens[this.currentTokenIndex].value;
 		if (controlType === 'func') {
 			return this.parseFunctionDeclaration();
+		} else if (controlType === 'while') {
+			return this.parseWhile();
+		} else if (controlType === 'if') {
+			return this.parseIf();
 		}
 		throw new Error(`Invalid control token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
+	}
+
+	private parseIf(): Statement {
+		this.currentTokenIndex++;
+		const condition = this.parseExpression();
+		if (!this.match('OPEN_BRACE')) {
+			throw new Error(`Expected { at index ${this.currentTokenIndex}.`);
+		}
+		this.currentTokenIndex++;
+		const body: Statement[] = [];
+		let brace = 1;
+		let closeBraceIndex = this.currentTokenIndex;
+		closeBraceIndex++;
+		while (brace) {
+			if (this.tokens[closeBraceIndex].type === 'CLOSE_BRACE') {
+				brace--;
+				if (brace === 0) {
+					break;
+				}
+			} else if (this.tokens[closeBraceIndex].type === 'OPEN_BRACE') {
+				brace++;
+			}
+			closeBraceIndex++;
+		}
+
+		this.currentTokenIndex++;
+		while (this.currentTokenIndex < closeBraceIndex) {
+			body.push(this.parseStatement());
+		}
+		this.currentTokenIndex = closeBraceIndex + 1;
+
+		if (this.tokens[this.currentTokenIndex].value !== 'else') {
+			return new IfStatement(
+				condition,
+				new CompoundStatement(body)
+			);
+		}
+
+		this.currentTokenIndex++;
+		if (!this.match('OPEN_BRACE')) {
+			throw new Error(`Expected { at index ${this.currentTokenIndex}.`);
+		}
+		this.currentTokenIndex++;
+		const elseBody: Statement[] = [];
+		brace = 1;
+		closeBraceIndex = this.currentTokenIndex;
+		closeBraceIndex++;
+		while (brace) {
+			if (this.tokens[closeBraceIndex].type === 'CLOSE_BRACE') {
+				brace--;
+				if (brace === 0) {
+					break;
+				}
+			} else if (this.tokens[closeBraceIndex].type === 'OPEN_BRACE') {
+				brace++;
+			}
+			closeBraceIndex++;
+		}
+
+		this.currentTokenIndex++;
+		while (this.currentTokenIndex < closeBraceIndex) {
+			elseBody.push(this.parseStatement());
+		}
+
+		this.currentTokenIndex = closeBraceIndex + 1;
+
+		return new IfStatement(
+			condition,
+			new CompoundStatement(body),
+			new CompoundStatement(elseBody)
+		);
+	}
+
+	private parseWhile(): Statement {
+		this.currentTokenIndex++;
+		const condition = this.parseExpression();
+		if (!this.match('OPEN_BRACE')) {
+			throw new Error(`Expected { at index ${this.currentTokenIndex}.`);
+		}
+		this.currentTokenIndex++;
+		const body: Statement[] = [];
+		let brace = 1;
+		let closeBraceIndex = this.currentTokenIndex;
+		closeBraceIndex++;
+		while (brace) {
+			if (this.tokens[closeBraceIndex].type === 'CLOSE_BRACE') {
+				brace--;
+				if (brace === 0) {
+					break;
+				}
+			} else if (this.tokens[closeBraceIndex].type === 'OPEN_BRACE') {
+				brace++;
+			}
+			closeBraceIndex++;
+		}
+		this.currentTokenIndex++;
+		while (this.currentTokenIndex < closeBraceIndex) {
+			body.push(this.parseStatement());
+		}
+		this.currentTokenIndex = closeBraceIndex + 1;
+		return new WhileStatement(
+			condition,
+			new CompoundStatement(body)
+		);
 	}
 
 	private parseFunctionDeclaration(): FunctionDeclarationStatement {
@@ -99,12 +210,13 @@ export class Parser {
 				new DeclarationStatement(parameterIdentifier, parameterType, false)
 			);
 			this.currentTokenIndex++;
-
+			
 			if (this.tokens[this.currentTokenIndex].value === ')') {
 				break;
 			} else if (this.tokens[this.currentTokenIndex].value !== ',') {
 				throw new Error(`Expected , at index ${this.currentTokenIndex}, got ${this.tokens[this.currentTokenIndex].value} instead.`)
 			}
+			this.currentTokenIndex++;
 		}
 
 		this.currentTokenIndex++;
@@ -125,9 +237,31 @@ export class Parser {
 			throw new Error(`Expected { at index ${this.currentTokenIndex}, got ${this.tokens[this.currentTokenIndex].value} instead.`)
 		}
 
+		// TODO: Implement body parsing
 		const body: Statement[] = [];
 
-		// TODO: Implement body parsing
+		let brace = 1;
+		let closeBraceIndex = this.currentTokenIndex;
+		closeBraceIndex++;
+		while (brace) {
+			if (this.tokens[closeBraceIndex].type === 'CLOSE_BRACE') {
+				brace--;
+				if (brace === 0) {
+					break;
+				}
+			} else if (this.tokens[closeBraceIndex].type === 'OPEN_BRACE') {
+				brace++;
+			}
+			closeBraceIndex++;
+		}
+		// closeBraceIndex++;
+		this.currentTokenIndex++;
+		while (this.currentTokenIndex < closeBraceIndex) {
+			body.push(this.parseStatement());
+		}
+
+		this.currentTokenIndex = closeBraceIndex + 1;
+
 
 		return new FunctionDeclarationStatement(
 			functionIdentifier,
@@ -189,7 +323,8 @@ export class Parser {
 
 	private parseExpression(): Expression {
 		const nextNewLine = this.tokens.find((token, index) => 
-			token.type === 'NEWLINE' && index > this.currentTokenIndex
+			(token.type === 'NEWLINE' || token.type === 'OPEN_BRACE') 
+			&& index > this.currentTokenIndex
 		)
 		if (nextNewLine === undefined) {
 			throw new Error('Expected newline.');
@@ -281,10 +416,31 @@ export class Parser {
 					)
 				);
 				expressionIndex++;
+			} else if (expressionTokens[expressionIndex].type === 'RELATIONAL_OPERATOR') {
+				const operator = expressionTokens[expressionIndex].value;
+				expressionIndex++;
+				const left = expressions.pop();
+				if (left === undefined) {
+					throw new Error('Expected left operand.');
+				}
+                this.currentTokenIndex += expressionIndex;
+				const right = this.parseExpression();
+				expressions.push(
+					new RelationalExpression(
+						left,
+						right,
+						operator as RelationalOperator
+					)
+				);
 			}
 		}
 		this.currentTokenIndex = newLineIndex + 1;
-
+		// while (this.match('NEWLINE')) {
+		// 	this.currentTokenIndex++;
+		// }
+		if (this.tokens[newLineIndex].type === 'OPEN_BRACE') {
+			this.currentTokenIndex = newLineIndex;
+		}
 		return expressions[0];
 
 		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
