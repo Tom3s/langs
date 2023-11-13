@@ -6,6 +6,7 @@ import { MethodCallExpression } from './Model/Expressions/MethodCallExpression';
 import { NOPExpression } from './Model/Expressions/NOPExpression';
 import { ReadExpression } from './Model/Expressions/ReadExpression';
 import { RelationalExpression, RelationalOperator } from './Model/Expressions/RelationalExpression';
+import { TernaryExpression } from './Model/Expressions/TernaryExpression';
 import { ValueExpression } from './Model/Expressions/ValueExpression';
 import { VariableExpression } from './Model/Expressions/VariableExpression';
 import { AssignStatement } from './Model/Statements/AssignStatement';
@@ -721,8 +722,33 @@ export class Parser {
 				);
 				this.currentTokenIndex++;
 			} else if (this.match('COMMA')) {
-				this.currentTokenIndex++;
+				// this.currentTokenIndex++;
 				return expressions[0];
+			} else if (this.match('COLON')) {
+				// this.currentTokenIndex++;
+				return expressions[0];
+			} else if (this.match('QUESTION')) {
+				this.currentTokenIndex++;
+				const trueExpression = this.parseExpression();
+				if (!this.match('COLON')) {
+					throw new Error(`Expected : at index ${this.currentTokenIndex}.`);
+				}
+				this.currentTokenIndex++;
+				const falseExpression = this.parseExpression();
+
+				const condition = expressions.pop();
+				if (condition === undefined) {
+					throw new Error('Expected condition for ternary expression.');
+				}
+
+				expressions.push(
+					new TernaryExpression(
+						condition,
+						trueExpression,
+						falseExpression
+					)
+				);
+				// this.currentTokenIndex++;
 			} else {
 				throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 			}

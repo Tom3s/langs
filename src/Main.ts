@@ -23,8 +23,10 @@ import { ReadExpression } from "./Model/Expressions/ReadExpression";
 import { FunctionValue } from "./Model/Values/FunctionValue";
 import { StringType } from "./Model/Types/StringType";
 import { ConversionExpression } from "./Model/Expressions/ConversionExpression";
+import { FloatType } from "./Model/Types/FloatType";
+import { ExternalExpression } from "./Model/Expressions/ExternalExpression";
 
-const lexer = new Lexer('../lab1/p2.whatever');
+const lexer = new Lexer('../lab1/p1.whatever');
 const tokens = lexer.tokenize();
 const parser = new Parser(tokens);
 
@@ -43,10 +45,27 @@ prefilledSymbolTable.add('toInt', new FunctionValue(
 		)
 	])
 ));
+prefilledSymbolTable.add('sqrt', new FunctionValue(
+	new FloatType(),
+	[
+		new DeclarationStatement('x', new FloatType())
+	],
+	new CompoundStatement([
+		new ReturnStatement(
+			new ExternalExpression(
+				new FloatType(),
+				[
+					new VariableExpression('x')
+				],
+				Math.sqrt
+			)
+		)
+	])
+));
 
 try {
-    parser.parse();
-    console.log('Syntax is correct!');
+	parser.parse();
+	console.log('Syntax is correct!');
 	const program = parser.getProgram();
 	// console.log(program.toString());
 	const programState = new ProgramState(
@@ -65,7 +84,7 @@ try {
 		}
 	}
 } catch (error: any) {
-    console.error('Syntax error:', error?.message);
+	console.error('Syntax error:', error?.message);
 }
 
 // const asd = new CompoundStatement([
