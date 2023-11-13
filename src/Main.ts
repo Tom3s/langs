@@ -24,7 +24,7 @@ import { FunctionValue } from "./Model/Values/FunctionValue";
 import { StringType } from "./Model/Types/StringType";
 import { ConversionExpression } from "./Model/Expressions/ConversionExpression";
 
-const lexer = new Lexer('../lab1/p1.whatever');
+const lexer = new Lexer('../lab1/p2.whatever');
 const tokens = lexer.tokenize();
 const parser = new Parser(tokens);
 

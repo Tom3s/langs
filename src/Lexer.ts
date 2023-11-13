@@ -109,11 +109,31 @@ export class Lexer {
 					return new Token('ARITHMETIC_OPERATOR', '-');
 				}
 			} else if (this.currentChar === '*') {
-				this.currentChar = this.nextChar();
-				return new Token('ARITHMETIC_OPERATOR', '*');
+				// this.currentChar = this.nextChar();
+				// return new Token('ARITHMETIC_OPERATOR', '*');
+				if (this.input[this.position + 1] === '/') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('COMMENT_END', '*/');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('ARITHMETIC_OPERATOR', '*');
+				}
 			} else if (this.currentChar === '/') {
-				this.currentChar = this.nextChar();
-				return new Token('ARITHMETIC_OPERATOR', '/');
+				// this.currentChar = this.nextChar();
+				// return new Token('ARITHMETIC_OPERATOR', '/');
+				if (this.input[this.position + 1] === '/') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('COMMENT', '//');
+				} else if (this.input[this.position + 1] === '*') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('COMMENT_START', '/*');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('ARITHMETIC_OPERATOR', '/');
+				}
 			} else if (this.currentChar === '%') {
 				this.currentChar = this.nextChar();
 				return new Token('ARITHMETIC_OPERATOR', '%');

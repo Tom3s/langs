@@ -22,6 +22,7 @@ import { FloatType } from './Model/Types/FloatType';
 import { IntegerType } from './Model/Types/IntegerType';
 import { StringType } from './Model/Types/StringType';
 import { Type } from './Model/Types/Type';
+import { BooleanValue } from './Model/Values/BooleanValue';
 import { FloatValue } from './Model/Values/FloatValue';
 import { IntegerValue } from './Model/Values/IntegerValue';
 import { StringValue } from './Model/Values/StringValue';
@@ -31,6 +32,7 @@ export class Parser {
 	private currentTokenIndex: number = 0;
 	private statements: Statement[] = [];
 	private parentheses: number = 0;
+	private commentState: number = 0;
 
 	constructor(tokens: Token[]) {
 		this.tokens = tokens;
@@ -44,11 +46,29 @@ export class Parser {
 		// const statements: Statement[] = [];
 
 		while (this.currentTokenIndex < this.tokens.length) {
-			const statement = this.parseStatement();
-			console.log(statement);
-			this.statements.push(statement);
+			try {
+				const statement = this.parseStatement();
+				console.log(statement);
+				this.statements.push(statement);
+			} catch (error: any) {
+				console.log(error?.message);
+				this.printError();
+				throw error;
+			}
 		}
 
+	}
+
+	private printError() {
+		let line = 0;
+		let index = 0;
+		while (index < this.currentTokenIndex) {
+			if (this.tokens[index].type === 'NEWLINE') {
+				line++;
+			}
+			index++;
+		}
+		console.log(`Error at line ${line + 1} at token ${this.tokens[this.currentTokenIndex].value}.`);
 	}
 
 	private match(tokenType: string) {
@@ -62,6 +82,9 @@ export class Parser {
 		// if (this.match('NEWLINE')) {
 		// 	this.currentTokenIndex++;
 		// 	return this.parseStatement();
+		if (this.match('COMMENT') || this.match('COMMENT_START')) {
+			this.skipComment();
+		}
 		while (this.match('NEWLINE')) {
 			this.currentTokenIndex++;
 		}
@@ -77,6 +100,27 @@ export class Parser {
 		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 	}
 
+	private skipComment() {
+		if (this.match('COMMENT')) {
+			while (!this.match('NEWLINE')) {
+				this.currentTokenIndex++;
+			}
+			return;
+		} else if (this.match('COMMENT_START')) {
+			this.commentState++;
+			this.currentTokenIndex++;
+			while (this.commentState) {
+				if (this.match('COMMENT_START')) {
+					this.commentState++;
+				} else if (this.match('COMMENT_END')) {
+					this.commentState--;
+				}
+				this.currentTokenIndex++;
+			}
+			return;
+		}
+		
+	}
 	private parseIdentifierStatement(): Statement {
 		const identifier = this.tokens[this.currentTokenIndex];
 		this.currentTokenIndex++;
@@ -368,6 +412,9 @@ export class Parser {
 	}
 
 	private parseExpression(): Expression {
+
+		
+
 		const expressionParentheses = this.parentheses;
 		const nextNewLine = this.tokens.find((token, index) =>
 			(token.type === 'NEWLINE' || token.type === 'OPEN_BRACE')
@@ -380,8 +427,12 @@ export class Parser {
 		const parseExpTokens = this.tokens.slice(this.currentTokenIndex, newLineIndex);
 
 		const expressions: Expression[] = [];
+
 		// let this.currentTokenIndex = 0;
 		while (this.currentTokenIndex < newLineIndex) {
+			if (this.match('COMMENT') || this.match('COMMENT_START')) {
+				this.skipComment();
+			}
 			if (this.match('IDENTIFIER')) {
 				expressions.push(
 					new VariableExpression(
@@ -425,6 +476,7 @@ export class Parser {
 						)
 					);
 				}
+				this.currentTokenIndex++;
 			} else if (this.match('DOT')) {
 				this.currentTokenIndex++;
 				if (this.tokens[this.currentTokenIndex].type !== 'IDENTIFIER') {
@@ -552,9 +604,21 @@ export class Parser {
 					)
 				);
 				this.currentTokenIndex++;
+			} else if (this.match('BOOLEAN')) {
+				const value: string = this.tokens[this.currentTokenIndex].value as string;
+				expressions.push(
+					new ValueExpression(
+						new BooleanValue(
+							value === 'true'
+						)
+					)
+				);
+				this.currentTokenIndex++;
 			} else if (this.match('COMMA')) {
 				this.currentTokenIndex++;
 				return expressions[0];
+			} else {
+				throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 			}
 		}
 		this.currentTokenIndex = newLineIndex + 1;
