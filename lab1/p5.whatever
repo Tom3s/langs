@@ -1,0 +1,25 @@
+var command: str = "none"
+
+func argTest(a: int, b: float, c: str) -> bool {
+	if a == 0 {
+		print("a is zero")
+		return true
+	}
+	if b == 0.0 {
+		print("b is zero")
+		return true
+	}
+	if c == "" {
+		print("c is empty")
+		return true
+	}
+	print("All params are truthy")
+	return true
+}
+
+var truthy: bool = argTest(-10, -0.2, "")
+
+var a: int = -1.5
+var b: int = 10
+
+print ("b - a with '+' operator ", b + a)

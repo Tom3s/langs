@@ -12,6 +12,7 @@ import { VariableExpression } from './Model/Expressions/VariableExpression';
 import { AssignStatement } from './Model/Statements/AssignStatement';
 import { CompoundStatement } from './Model/Statements/CompoundStatement';
 import { DeclarationStatement } from './Model/Statements/DeclarationStatement';
+import { DiscardStatement } from './Model/Statements/DiscardStatement';
 import { ForInStatement } from './Model/Statements/ForInStatement';
 import { ForStatement } from './Model/Statements/ForStatement';
 import { FunctionDeclarationStatement } from './Model/Statements/FunctionDeclarationStatement';
@@ -25,6 +26,7 @@ import { FloatType } from './Model/Types/FloatType';
 import { IntegerType } from './Model/Types/IntegerType';
 import { StringType } from './Model/Types/StringType';
 import { Type } from './Model/Types/Type';
+import { VoidType } from './Model/Types/VoidType';
 import { BooleanValue } from './Model/Values/BooleanValue';
 import { FloatValue } from './Model/Values/FloatValue';
 import { IntegerValue } from './Model/Values/IntegerValue';
@@ -173,6 +175,10 @@ export class Parser {
 					ArithmeticOperator.SUBTRACT
 				)
 			);
+		} else if (this.match('OPEN_PAREN')) {
+			this.currentTokenIndex--;
+			const expression = this.parseExpression();
+			return new DiscardStatement(expression);
 		}
 		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 	}
@@ -295,10 +301,10 @@ export class Parser {
 		}
 		this.currentTokenIndex++;
 
-		if (!this.match('IDENTIFIER')) {
-			throw new Error(`Expected identifier at index ${this.currentTokenIndex}.`);
+		if (!this.match('IDENTIFIER') && !this.match('NUMBER') && !this.match('STRING')) {
+			throw new Error(`Expected identifier, number or string at index ${this.currentTokenIndex}.`);
 		}
-		const iterable = this.tokens[this.currentTokenIndex].value;
+		const iterable = this.tokens[this.currentTokenIndex];
 		this.currentTokenIndex++;
 
 		if (!this.match('OPEN_BRACE')) {
@@ -327,11 +333,25 @@ export class Parser {
 		}
 		this.currentTokenIndex = closeBraceIndex + 2;
 
-		return new ForInStatement(
-			iterator,
-			iterable,
-			new CompoundStatement(body)
-		)
+		if (iterable.type === 'IDENTIFIER') {
+			return new ForInStatement(
+				iterator,
+				iterable.value,
+				new CompoundStatement(body)
+			)
+		} else if (iterable.type === 'NUMBER') {
+			throw new Error('Number literal iteration not implemented yet.');
+			// return new ForInStatement(
+			// 	iterator,
+			// 	new ValueExpression(
+			// 		new IntegerValue(parseInt(iterable.value))
+			// 	),
+			// 	new CompoundStatement(body)
+			// )
+		} else if (iterable.type === 'STRING') {
+			throw new Error('String literal iteration not implemented yet.');
+		}
+		throw new Error(`Expected identifier, number or string at index ${this.currentTokenIndex}.`);
 	}
 
 	private parseForNormal(): Statement {
@@ -448,6 +468,9 @@ export class Parser {
 		}
 		this.currentTokenIndex++;
 		while (true) {
+			if (this.tokens[this.currentTokenIndex].value === ')') {
+				break;
+			}
 			if (this.tokens[this.currentTokenIndex].type !== 'IDENTIFIER') {
 				throw new Error(`Expected parameter identifier at index ${this.currentTokenIndex}, got ${this.tokens[this.currentTokenIndex].value} instead.`)
 			}
@@ -469,7 +492,6 @@ export class Parser {
 				new DeclarationStatement(parameterIdentifier, parameterType, false)
 			);
 			this.currentTokenIndex++;
-
 			if (this.tokens[this.currentTokenIndex].value === ')') {
 				break;
 			} else if (this.tokens[this.currentTokenIndex].value !== ',') {
@@ -488,7 +510,7 @@ export class Parser {
 		if (this.tokens[this.currentTokenIndex].type !== 'TYPE') {
 			throw new Error(`Expected return type at index ${this.currentTokenIndex}, got ${this.tokens[this.currentTokenIndex].value} instead.`)
 		}
-		const returnType = this.typeObjectFromString(this.tokens[this.currentTokenIndex].value);
+		const returnType = this.typeObjectFromString(this.tokens[this.currentTokenIndex].value, false);
 
 		this.currentTokenIndex++;
 
@@ -759,9 +781,12 @@ export class Parser {
 			} else if (this.match('ARITHMETIC_OPERATOR')) {
 				const operator = this.tokens[this.currentTokenIndex].value;
 				this.currentTokenIndex++;
-				const left = expressions.pop();
+				let left = expressions.pop();
 				if (left === undefined) {
-					throw new Error('Expected left operand.');
+					if (operator !== ArithmeticOperator.SUBTRACT)
+						throw new Error('Expected left operand.');
+					else 
+						left = new ValueExpression(new IntegerValue(0));
 				}
 				const right = this.parseExpression();
 				expressions.push(
@@ -887,7 +912,7 @@ export class Parser {
 		throw new Error(`Expected read at index ${this.currentTokenIndex}.`);
 	}
 
-	typeObjectFromString(type: string): Type {
+	typeObjectFromString(type: string, variable: boolean = true): Type {
 		switch (type) {
 			case 'bool':
 				return new BooleanType();
@@ -900,7 +925,9 @@ export class Parser {
 			case 'list':
 				throw new Error('List type not implemented.');
 			case 'void':
-				throw new Error('Cannot declare a variable of type void.');
+				if (variable)
+					throw new Error('Cannot declare a variable of type void.');
+				return new VoidType();
 			default:
 				throw new Error(`Unknown type ${type}.`);
 		}

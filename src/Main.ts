@@ -22,6 +22,7 @@ const lexer = new Lexer('.' + process.argv[2]);
 let tokens: any[] = [];
 try {
 	tokens = lexer.tokenize();
+	console.log('Lexically correct!');
 } catch (error: any) {
 	console.log('Lexical error:', error?.message);
 	process.exit(1);

@@ -16,6 +16,8 @@ export class PrintStatement implements Statement {
 			// console.log(evaluatedString);
 			process.stdout.write(evaluatedString);
 		});
+		programState.output.push("\n");
+		console.log();
 		return null;
 	}
 

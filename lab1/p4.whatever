@@ -1,0 +1,15 @@
+func fibonacci(a: int) -> int {
+	if a == 0 {
+		return 1
+	}
+	if a == 1 {
+		return 1
+	}
+	// var b: int = fibonacci(a - 1)
+	return fibonacci(a - 1) + fibonacci(a - 2)
+}
+
+var n: int = 10
+for i in n {
+	print(i + 1, ". fibonacci number is: ", fibonacci(i))
+}

@@ -62,7 +62,9 @@ export class FunctionCallExpression implements Expression {
 				// console.log(functionProgramState.symbolTable.get('a'));
 				// console.log(functionProgramState.symbolTable.get('b'));
 			} catch (error: any) {
-				console.log(`Error: ${error.message}`);
+				if (error.message !== "Execution stack is empty") {
+					console.log(`Error: ${error.message}`);
+				}
 				break;
 			}
 		}		

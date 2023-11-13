@@ -15,6 +15,9 @@ export class Lexer {
 		const input = fs.readFileSync(filePath, 'utf-8');
 
 		this.input = input.replace(/\r\n/g, '\n');
+		if (!input.endsWith('\n')) {
+			this.input += '\n';
+		}
 		this.currentChar = this.input[0];
 	}
 
@@ -68,7 +71,7 @@ export class Lexer {
 				// Check for keywords or identifiers
 				if (value === 'var' || value === 'const') {
 					return new Token('DECLARATION', value);
-				} else if (value === 'int' || value === 'float' || value === 'bool' || value === 'str' || value === 'list') {
+				} else if (value === 'int' || value === 'float' || value === 'bool' || value === 'str' || value === 'list' || value === 'void') {
 					return new Token('TYPE', value);
 				} else if (value === 'if' || value === 'else' || value === 'while' || value === 'do' || value === 'for' || value === 'break' || value === 'continue' || value === 'return' || value === 'func' || value === 'in') {
 					return new Token('CONTROL', value);
