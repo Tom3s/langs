@@ -1,3 +1,4 @@
+print("How many numbers to add up?")
 var n: int = read().toInt()
 
 var sum: int = 0
@@ -5,7 +6,8 @@ var sum: int = 0
 for i in n {
 	n = read().toInt()
 
-	sum += n
+	// sum += n
+	sum = sum + n
 }
 
 print("Sum of inputed ", n, " numbers is: ", sum)

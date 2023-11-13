@@ -24,6 +24,6 @@ export class ReturnStatement implements Statement {
 	}
 
 	toString(): string {
-		return `return ${this.value}\n`;
+		return `return ${this.value?.toString()}\n`;
 	}
 }

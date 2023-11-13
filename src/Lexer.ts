@@ -103,6 +103,9 @@ export class Lexer {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
 					return new Token('INCREMENT', '++');
+				} else {
+					this.currentChar = this.nextChar();
+					return new Token('ARITHMETIC_OPERATOR', '+');
 				}
             } else if (this.currentChar === '-') {
 				if (this.input[this.position + 1] === '>') {
@@ -248,27 +251,27 @@ export class Lexer {
 
             // Handle comments
 
-            if (this.currentChar === '/') {
-                this.currentChar = this.nextChar();
-                if (this.currentChar === '/') {
-                    // Single-line comment
-                    while (this.currentChar !== null && this.currentChar !== '\n') {
-                        this.currentChar = this.nextChar();
-                    }
-                } else if (this.currentChar === '*') {
-                    // Multi-line comment
-                    this.currentChar = this.nextChar();
-                    while (this.currentChar !== null) {
-                        if (this.currentChar === '*' && this.input[this.position + 1] === '/') {
-                            this.currentChar = this.nextChar();
-                            this.currentChar = this.nextChar();
-                            break;
-                        }
-                        this.currentChar = this.nextChar();
-                    }
-                }
-                continue; // Continue to the next token
-            }
+            // if (this.currentChar === '/') {
+            //     this.currentChar = this.nextChar();
+            //     if (this.currentChar === '/') {
+            //         // Single-line comment
+            //         while (this.currentChar !== null && this.currentChar !== '\n') {
+            //             this.currentChar = this.nextChar();
+            //         }
+            //     } else if (this.currentChar === '*') {
+            //         // Multi-line comment
+            //         this.currentChar = this.nextChar();
+            //         while (this.currentChar !== null) {
+            //             if (this.currentChar === '*' && this.input[this.position + 1] === '/') {
+            //                 this.currentChar = this.nextChar();
+            //                 this.currentChar = this.nextChar();
+            //                 break;
+            //             }
+            //             this.currentChar = this.nextChar();
+            //         }
+            //     }
+            //     continue; // Continue to the next token
+            // }
 
             // If none of the conditions match, throw an error or handle it as needed.
 
@@ -293,7 +296,7 @@ export class Lexer {
 		// 	}
 		// }
 
-		console.log(tokens);
+		// console.log(tokens);
 
         return tokens;
     }

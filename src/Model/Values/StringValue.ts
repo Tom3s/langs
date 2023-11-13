@@ -17,6 +17,6 @@ export class StringValue implements Value {
 	}
 
 	toString(): string {
-		return this.body.toString();
+		return `\"${this.body.toString()}\"`;
 	}
 }
