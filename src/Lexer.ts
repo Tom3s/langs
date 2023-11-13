@@ -97,6 +97,12 @@ export class Lexer {
 			} else if (this.currentChar === '}') {
 				this.currentChar = this.nextChar();
 				return new Token('CLOSE_BRACE', '}');
+			} else if (this.currentChar === '[') {
+				this.currentChar = this.nextChar();
+				return new Token('OPEN_BRACKET', '[');
+			} else if (this.currentChar === ']') {
+				this.currentChar = this.nextChar();
+				return new Token('CLOSE_BRACKET', ']');
 			}
 
 			// Add more conditions for operators, numbers, strings, and other tokens.
@@ -228,6 +234,9 @@ export class Lexer {
 				this.currentChar = this.nextChar();
 				let value = '';
 				while (this.currentChar !== null && this.currentChar !== quoteChar) {
+					if (this.currentChar === '\n' || this.currentChar === '\r') {
+						throw new Error('Unterminated string');
+					}
 					value += this.currentChar;
 					this.currentChar = this.nextChar();
 				}
@@ -272,6 +281,7 @@ export class Lexer {
 			console.log(error?.message);
 			this.printError();
 			throw error;
+			// return [];
 		}
 	}
 

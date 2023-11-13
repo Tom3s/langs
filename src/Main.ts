@@ -19,7 +19,13 @@ import { ExternalExpression } from "./Model/Expressions/ExternalExpression";
 
 const lexer = new Lexer('.' + process.argv[2]);
 // const lexer = new Lexer('../lab1/p3.whatever');
-const tokens = lexer.tokenize();
+let tokens: any[] = [];
+try {
+	tokens = lexer.tokenize();
+} catch (error: any) {
+	console.log('Lexical error:', error?.message);
+	process.exit(1);
+}
 const parser = new Parser(tokens);
 
 const prefilledSymbolTable = new SymbolTable(16);
@@ -77,5 +83,5 @@ try {
 		}
 	}
 } catch (error: any) {
-	console.error('Syntax error:', error?.message);
+	console.log('Syntax error:', error?.message);
 }
