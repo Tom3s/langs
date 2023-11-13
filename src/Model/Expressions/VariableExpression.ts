@@ -12,6 +12,7 @@ export class VariableExpression implements Expression {
 		// return symbolTable.get(this.identifier);
 		const value = symbolTable.get(this.identifier);
 		if (value === undefined) {
+			// console.log(symbolTable);
 			throw new Error(`Variable ${this.identifier} not defined`);
 		}
 		return value;

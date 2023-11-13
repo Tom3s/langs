@@ -66,7 +66,7 @@ export class Lexer {
                     return new Token('DECLARATION', value);
                 } else if (value === 'int' || value === 'float' || value === 'bool' || value === 'str' || value === 'list') {
                     return new Token('TYPE', value);
-                } else if (value === 'if' || value === 'else' || value === 'while' || value === 'do' || value === 'for' || value === 'break' || value === 'continue' || value === 'return' || value === 'func') {
+                } else if (value === 'if' || value === 'else' || value === 'while' || value === 'do' || value === 'for' || value === 'break' || value === 'continue' || value === 'return' || value === 'func' || value === 'in') {
                     return new Token('CONTROL', value);
 				} else if (value === 'print' || value === 'read' || value === 'readln') {
 					return new Token('IO', value);

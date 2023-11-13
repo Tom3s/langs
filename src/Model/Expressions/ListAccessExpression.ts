@@ -1,5 +1,6 @@
 import SymbolTable from "../ADT/SymbolTable";
 import { IntegerType } from "../Types/IntegerType";
+import { ListType } from "../Types/ListType";
 import { Type } from "../Types/Type";
 import { ListValue } from "../Values/ListValue";
 import { Value } from "../Values/Value";
@@ -19,12 +20,24 @@ export class ListAccessExpression implements Expression {
 		}
 
 		const indexNumber = indexValue.body;
-		const listValue = this.list.evaluate(symbolTable).body;
-		if (indexNumber < 0 || indexNumber >= listValue.length) {
-			throw new Error(`Index ${indexNumber} out of bounds (list length: ${listValue.length})`);
+		const listValue = this.list.evaluate(symbolTable);
+
+		if (!(listValue.getType().equals(new ListType(new IntegerType())))) {
+			throw new Error(`Variable ${this.list.identifier} is not a list`);
 		}
 
-		return listValue[indexNumber];
+		if (indexNumber < 0 || indexNumber >= listValue.body.length) {
+			throw new Error(`Index ${indexNumber} out of bounds (list length: ${listValue.body.length})`);
+		}
+
+		const typedListValue: ListValue = listValue as ListValue;
+
+		// console.log(`List access ${this.list.identifier}[${indexNumber}] = ${typedListValue.body[indexNumber].toString()}`);
+
+		return typedListValue.body[indexNumber];
+		// const returnValue = listValue.elementType.defaultValue();
+		// returnValue.body = listValue.body[indexNumber];
+		// return returnValue;
 	}
 
 	typeCheck(typeEnvironment: Map<string, Type>): Type {
@@ -47,6 +60,6 @@ export class ListAccessExpression implements Expression {
 	}
 
 	deepCopy(): Expression {
-		return new ListAccessExpression(this.list, this.index);
+		return new ListAccessExpression(this.list.deepCopy() as VariableExpression, this.index.deepCopy());
 	}
 }

@@ -17,8 +17,8 @@ import { ExternalExpression } from "./Model/Expressions/ExternalExpression";
 // 	console.log(index + ': ' + val);
 // });
 
-// const lexer = new Lexer('.' + process.argv[2]);
-const lexer = new Lexer('../lab1/p3.whatever');
+const lexer = new Lexer('.' + process.argv[2]);
+// const lexer = new Lexer('../lab1/p3.whatever');
 const tokens = lexer.tokenize();
 const parser = new Parser(tokens);
 

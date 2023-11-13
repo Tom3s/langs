@@ -12,7 +12,7 @@ export class CompoundStatement implements Statement {
 	}
 
 	execute(programState: ProgramState): ProgramState | null {
-		programState.executionStack.push(...this.statements.reverse());
+		programState.executionStack.push(...this.statements.slice().reverse());
 		return null;
 	}
 

@@ -3,11 +3,12 @@ var n: int = read().toInt()
 
 var sum: int = 0
 
-for i in n {
-	n = read().toInt()
+var t: int = 0
 
-	// sum += n
-	sum = sum + n
+for i in n {
+	t = read().toInt()
+	// print("Current value of i: ", i, "\n")
+	sum = sum + t
 }
 
 print("Sum of inputed ", n, " numbers is: ", sum)

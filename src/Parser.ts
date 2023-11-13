@@ -12,6 +12,7 @@ import { VariableExpression } from './Model/Expressions/VariableExpression';
 import { AssignStatement } from './Model/Statements/AssignStatement';
 import { CompoundStatement } from './Model/Statements/CompoundStatement';
 import { DeclarationStatement } from './Model/Statements/DeclarationStatement';
+import { ForInStatement } from './Model/Statements/ForInStatement';
 import { ForStatement } from './Model/Statements/ForStatement';
 import { FunctionDeclarationStatement } from './Model/Statements/FunctionDeclarationStatement';
 import { IfStatement } from './Model/Statements/IfStatement';
@@ -87,11 +88,13 @@ export class Parser {
 		// if (this.match('NEWLINE')) {
 		// 	this.currentTokenIndex++;
 		// 	return this.parseStatement();
-		if (this.match('COMMENT') || this.match('COMMENT_START')) {
-			this.skipComment();
-		}
-		while (this.match('NEWLINE')) {
-			this.currentTokenIndex++;
+		while (this.match('COMMENT') || this.match('COMMENT_START') || this.match('NEWLINE')) {
+			if (this.match('COMMENT') || this.match('COMMENT_START')) {
+				this.skipComment();
+			}
+			while (this.match('NEWLINE')) {
+				this.currentTokenIndex++;
+			}
 		}
 		if (this.match('DECLARATION')) {
 			return this.parseDeclaration();
@@ -263,9 +266,65 @@ export class Parser {
 
 	private parseFor(): Statement {
 		this.currentTokenIndex++;
-		if (!this.match('OPEN_PAREN')) {
-			throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
+		if (this.match('OPEN_PAREN')) {
+			// throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
+			return this.parseForNormal();
+		} else if (this.match('IDENTIFIER')) {
+			return this.parseForIn();
+		} else {
+			throw new Error(`Expected ( or identifier at index ${this.currentTokenIndex}.`);
 		}
+
+	}
+
+	private parseForIn(): Statement {
+		const iterator = this.tokens[this.currentTokenIndex].value;
+		this.currentTokenIndex++;
+		if (this.tokens[this.currentTokenIndex].value !== 'in') {
+			throw new Error(`Expected in at index ${this.currentTokenIndex}.`);
+		}
+		this.currentTokenIndex++;
+
+		if (!this.match('IDENTIFIER')) {
+			throw new Error(`Expected identifier at index ${this.currentTokenIndex}.`);
+		}
+		const iterable = this.tokens[this.currentTokenIndex].value;
+		this.currentTokenIndex++;
+
+		if (!this.match('OPEN_BRACE')) {
+			throw new Error(`Expected { at index ${this.currentTokenIndex}.`);
+		}
+		this.currentTokenIndex++;
+		const body: Statement[] = [];
+		let brace = 1;
+		let closeBraceIndex = this.currentTokenIndex;
+		closeBraceIndex++;
+		while (brace) {
+			if (this.tokens[closeBraceIndex].type === 'CLOSE_BRACE') {
+				brace--;
+				if (brace === 0) {
+					break;
+				}
+			} else if (this.tokens[closeBraceIndex].type === 'OPEN_BRACE') {
+				brace++;
+			}
+			closeBraceIndex++;
+		}
+
+		this.currentTokenIndex++;
+		while (this.currentTokenIndex < closeBraceIndex) {
+			body.push(this.parseStatement());
+		}
+		this.currentTokenIndex = closeBraceIndex + 2;
+
+		return new ForInStatement(
+			iterator,
+			iterable,
+			new CompoundStatement(body)
+		)
+	}
+
+	private parseForNormal(): Statement {
 		this.parentheses++;
 
 		this.currentTokenIndex++;

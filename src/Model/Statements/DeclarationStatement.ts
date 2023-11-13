@@ -23,8 +23,6 @@ export class DeclarationStatement implements Statement {
 			throw new Error(`Constant ${this.name} must be initialized`);
 		} 
 
-		console.log(`Declaring ${this.name} as ${this.type.toString()}`)
-
 		if (this.value === null) {
 			programState.symbolTable.add(this.name, this.type.defaultValue());
 		} else {

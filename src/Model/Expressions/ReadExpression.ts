@@ -8,7 +8,7 @@ import { Expression } from "./Expression";
 
 export class ReadExpression implements Expression {
 	evaluate(symbolTable: SymbolTable): Value {
-		console.log("===============READING INPUT===============")
+		// console.log("===============READING INPUT===============")
 
 		const prompt = require('prompt-sync')();
 

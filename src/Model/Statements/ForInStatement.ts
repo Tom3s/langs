@@ -1,5 +1,6 @@
 import { ArithmeticExpression, ArithmeticOperator } from "../Expressions/ArithmeticExpression";
 import { ListAccessExpression } from "../Expressions/ListAccessExpression";
+import { NOPExpression } from "../Expressions/NOPExpression";
 import { RelationalExpression, RelationalOperator } from "../Expressions/RelationalExpression";
 import { ValueExpression } from "../Expressions/ValueExpression";
 import { VariableExpression } from "../Expressions/VariableExpression";
@@ -13,6 +14,7 @@ import { AssignStatement } from "./AssignStatement";
 import { CompoundStatement } from "./CompoundStatement";
 import { DeclarationStatement } from "./DeclarationStatement";
 import { FreeStatement } from "./FreeStatement";
+import { NOPStatement } from "./NOPStatement";
 import { Statement } from "./Statement";
 import { WhileStatement } from "./WhileStatement";
 
@@ -35,9 +37,9 @@ export class ForInStatement implements Statement {
 			throw new Error(`Variable ${this.iterator} already declared`);
 		}
 
-		if (!symbolTable.has(this.iterable)) {
-			throw new Error(`Iterable ${this.iterable} not declared`);
-		}
+		// if (!symbolTable.has(this.iterable)) {
+		// 	throw new Error(`Iterable ${this.iterable} not declared`);
+		// }
 
 		const iterableValue = symbolTable.get(this.iterable);
 		if (iterableValue === undefined) {
@@ -45,38 +47,56 @@ export class ForInStatement implements Statement {
 		}
 
 		if (
-			!iterableValue.getType().equals(new IntegerType()) ||
+			!iterableValue.getType().equals(new IntegerType()) &&
 			!iterableValue.getType().equals(new ListType(new IntegerType()))
 		) {
 			throw new Error(`Variable ${this.iterable} is not iterable`);
 		}
 
-		let iterableList = iterableValue.body;
-		if (iterableList.getType().equals(new IntegerType())) {
+		let iterableList: ListValue;
+		if (iterableValue.getType().equals(new IntegerType())) {
 			iterableList = new ListValue(
 				new IntegerType(),
 				[...Array(iterableValue.body).keys()].map((value) => new IntegerValue(value))
 			)
+			this.iterable = this.iteratorName + '_list'
+		} else {
+			iterableList = iterableValue as ListValue;
 		}
 
+		// console.log(iterableList.toString());
+
 		var whileStatement = new CompoundStatement([
-			new DeclarationStatement(this.iteratorName, new IntegerType()),
+			this.iterable.startsWith('iteratorHopefullyNotUsedHSG_H_SDRSD__87687_6a8GD_ASD_876__8768_') ?
+			new DeclarationStatement(
+				this.iterable,
+				new ListType(iterableList.elementType),
+				false,
+				new ValueExpression(
+					iterableList
+				)
+			) : new NOPStatement(),
+			new DeclarationStatement(this.iteratorName, new IntegerType(), false, new ValueExpression(new IntegerValue(0))),
 			new DeclarationStatement(
 				this.iterator, 
-				iterableList.elementType, 
-				false,
-				new ListAccessExpression(new VariableExpression(this.iterable), new VariableExpression(this.iteratorName))
+				iterableList.elementType
 			), 
-			// new DeclarationStatement(this.iterator, iterableList.elementType),
+			// new DeclarationStatement(this.iteratorName + String(ForInStatement.iteratorIndex), iterableList.elementType),
 			// new AssignStatement(this.iteratorName, new ValueExpression(new IntegerValue(0))),
 			// new AssignStatement(this.iterator, new ListAccessExpression(new VariableExpression(this.iterable), new VariableExpression(this.iteratorName))),
 			new WhileStatement(
 				new RelationalExpression(
-					new VariableExpression(this.iterator), 
-					new ValueExpression(iterableList.value.length),
+					new VariableExpression(this.iteratorName), 
+					new ValueExpression(
+						new IntegerValue(iterableList.body.length)
+					),
 					RelationalOperator.LESS_THAN
 				),
 				new CompoundStatement([
+					new AssignStatement(
+						this.iterator,
+						new ListAccessExpression(new VariableExpression(this.iterable), new VariableExpression(this.iteratorName))
+					),
 					this.body,
 					new AssignStatement(
 						this.iteratorName,
@@ -86,14 +106,12 @@ export class ForInStatement implements Statement {
 							ArithmeticOperator.ADD
 						)
 					),
-					new AssignStatement(
-						this.iterator,
-						new ListAccessExpression(new VariableExpression(this.iterable), new VariableExpression(this.iteratorName))
-					),
 				])
 			),
 			new FreeStatement(this.iteratorName),
 			new FreeStatement(this.iterator),
+			this.iterable.startsWith('iteratorHopefullyNotUsedHSG_H_SDRSD__87687_6a8GD_ASD_876__8768_') ?
+			new FreeStatement(this.iterable) : new NOPStatement(),
 		]);
 
 		programState.executionStack.push(whileStatement);
