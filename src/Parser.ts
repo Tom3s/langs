@@ -11,6 +11,7 @@ import { VariableExpression } from './Model/Expressions/VariableExpression';
 import { AssignStatement } from './Model/Statements/AssignStatement';
 import { CompoundStatement } from './Model/Statements/CompoundStatement';
 import { DeclarationStatement } from './Model/Statements/DeclarationStatement';
+import { ForStatement } from './Model/Statements/ForStatement';
 import { FunctionDeclarationStatement } from './Model/Statements/FunctionDeclarationStatement';
 import { IfStatement } from './Model/Statements/IfStatement';
 import { PrintStatement } from './Model/Statements/PrintStatement';
@@ -62,18 +63,21 @@ export class Parser {
 	private printError() {
 		let line = 0;
 		let index = 0;
+		let lastLineIndex = 0;
 		while (index < this.currentTokenIndex) {
 			if (this.tokens[index].type === 'NEWLINE') {
 				line++;
+				lastLineIndex = index;
 			}
 			index++;
 		}
+		console.log(this.tokens.slice(lastLineIndex, this.currentTokenIndex).map(token => token.value).join(' '));
 		console.log(`Error at line ${line + 1} at token ${this.tokens[this.currentTokenIndex].value}.`);
 	}
 
 	private match(tokenType: string) {
 		// Check if the current token matches the expected token type.
-		return this.currentTokenIndex < this.tokens.length && 
+		return this.currentTokenIndex < this.tokens.length &&
 			this.tokens[this.currentTokenIndex].type === tokenType;
 	}
 
@@ -119,7 +123,7 @@ export class Parser {
 			}
 			return;
 		}
-		
+
 	}
 	private parseIdentifierStatement(): Statement {
 		const identifier = this.tokens[this.currentTokenIndex];
@@ -130,6 +134,30 @@ export class Parser {
 			return new AssignStatement(
 				identifier.value,
 				expression
+			);
+		} else if (this.match('INCREMENT')) {
+			this.currentTokenIndex++;
+			return new AssignStatement(
+				identifier.value,
+				new ArithmeticExpression(
+					new VariableExpression(identifier.value),
+					new ValueExpression(
+						new IntegerValue(1)
+					),
+					ArithmeticOperator.ADD
+				)
+			);
+		} else if (this.match('DECREMENT')) {
+			this.currentTokenIndex++;
+			return new AssignStatement(
+				identifier.value,
+				new ArithmeticExpression(
+					new VariableExpression(identifier.value),
+					new ValueExpression(
+						new IntegerValue(1)
+					),
+					ArithmeticOperator.SUBTRACT
+				)
 			);
 		}
 		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
@@ -145,6 +173,8 @@ export class Parser {
 			return this.parseIf();
 		} else if (controlType === 'return') {
 			return this.parseReturn();
+		} else if (controlType === 'for') {
+			return this.parseFor();
 		}
 		throw new Error(`Invalid control token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 	}
@@ -188,6 +218,7 @@ export class Parser {
 		this.currentTokenIndex = closeBraceIndex + 1;
 
 		if (this.tokens[this.currentTokenIndex].value !== 'else') {
+			this.currentTokenIndex = closeBraceIndex + 2;
 			return new IfStatement(
 				condition,
 				new CompoundStatement(body)
@@ -226,6 +257,78 @@ export class Parser {
 			condition,
 			new CompoundStatement(body),
 			new CompoundStatement(elseBody)
+		);
+	}
+
+	private parseFor(): Statement {
+		this.currentTokenIndex++;
+		if (!this.match('OPEN_PAREN')) {
+			throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
+		}
+		this.parentheses++;
+
+		this.currentTokenIndex++;
+		const initialization = this.parseStatement();
+		if (!(initialization instanceof DeclarationStatement)) {
+			throw new Error(`Expected declaration at index ${this.currentTokenIndex}.`);
+		}
+		console.log(initialization.toString());
+
+		if (!this.match('OPEN_PAREN')) {
+			throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
+		}
+		this.parentheses++;
+
+		this.currentTokenIndex++;
+		const condition = this.parseExpression();
+		console.log(condition.toString());
+		if (!this.match('OPEN_PAREN')) {
+			throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
+		}
+		this.parentheses++;
+
+		this.currentTokenIndex++;
+		const increment = this.parseStatement();
+		console.log(increment.toString());
+
+		this.currentTokenIndex++;
+		if (!this.match('OPEN_BRACE')) {
+			throw new Error(`Expected { at index ${this.currentTokenIndex}.`);
+		}
+		this.currentTokenIndex++;
+		const body: Statement[] = [];
+		let brace = 1;
+		let closeBraceIndex = this.currentTokenIndex;
+		closeBraceIndex++;
+		while (brace) {
+			if (this.tokens[closeBraceIndex].type === 'CLOSE_BRACE') {
+				brace--;
+				if (brace === 0) {
+					break;
+				}
+			} else if (this.tokens[closeBraceIndex].type === 'OPEN_BRACE') {
+				brace++;
+			}
+			closeBraceIndex++;
+		}
+
+		this.currentTokenIndex++;
+		while (this.currentTokenIndex < closeBraceIndex) {
+			body.push(this.parseStatement());
+		}
+		this.currentTokenIndex = closeBraceIndex + 2;
+
+		const initialValue = (initialization as DeclarationStatement).value;
+		if (initialValue === null) {
+			throw new Error(`Expected initialization value at index ${this.currentTokenIndex}.`);
+		}
+
+		return new ForStatement(
+			(initialization as DeclarationStatement).name,
+			initialValue,
+			condition,
+			increment,
+			new CompoundStatement(body)
 		);
 	}
 
@@ -413,7 +516,7 @@ export class Parser {
 
 	private parseExpression(): Expression {
 
-		
+
 
 		const expressionParentheses = this.parentheses;
 		const nextNewLine = this.tokens.find((token, index) =>
@@ -429,9 +532,12 @@ export class Parser {
 		const expressions: Expression[] = [];
 
 		// let this.currentTokenIndex = 0;
-		while (this.currentTokenIndex < newLineIndex) {
+		while (this.currentTokenIndex < newLineIndex && expressionParentheses <= this.parentheses) {
 			if (this.match('COMMENT') || this.match('COMMENT_START')) {
 				this.skipComment();
+				if (this.currentTokenIndex >= newLineIndex) {
+					break;
+				}
 			}
 			if (this.match('IDENTIFIER')) {
 				expressions.push(
@@ -496,7 +602,7 @@ export class Parser {
 				while (this.parentheses > localParentheses) {
 					if (this.match('CLOSE_PAREN')) {
 						this.parentheses--;
-						if (this.parentheses === localParentheses) {
+						if (this.parentheses <= localParentheses) {
 							break;
 						}
 					} else if (this.match('OPEN_PAREN')) {
@@ -531,7 +637,7 @@ export class Parser {
 					if (this.match('CLOSE_PAREN')) {
 						this.parentheses--;
 						this.currentTokenIndex++;
-						if (this.parentheses === localParentheses) {
+						if (this.parentheses <= localParentheses) {
 							break;
 						}
 					} else if (this.match('OPEN_PAREN')) {
@@ -553,12 +659,12 @@ export class Parser {
 						expressionList.filter(expression => !(expression instanceof NOPExpression))
 					)
 				);
-				this.currentTokenIndex++;
+				// this.currentTokenIndex++;
 
 			} else if (this.match('CLOSE_PAREN')) {
 				this.parentheses--;
 				this.currentTokenIndex++;
-				if (expressionParentheses === this.parentheses) {
+				if (this.parentheses <= expressionParentheses) {
 					if (expressions.length === 0) {
 						return new NOPExpression();
 					}
@@ -621,10 +727,12 @@ export class Parser {
 				throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 			}
 		}
-		this.currentTokenIndex = newLineIndex + 1;
+		if (this.currentTokenIndex >= newLineIndex) {
+			this.currentTokenIndex = newLineIndex + 1;
 
-		if (this.tokens[newLineIndex].type === 'OPEN_BRACE') {
-			this.currentTokenIndex = newLineIndex;
+			if (this.tokens[newLineIndex].type === 'OPEN_BRACE') {
+				this.currentTokenIndex = newLineIndex;
+			}
 		}
 
 		if (expressions.length === 0) {

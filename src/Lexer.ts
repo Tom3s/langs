@@ -97,13 +97,22 @@ export class Lexer {
 
             // Example for '+':
             if (this.currentChar === '+') {
-                this.currentChar = this.nextChar();
-                return new Token('ARITHMETIC_OPERATOR', '+');
+                // this.currentChar = this.nextChar();
+                // return new Token('ARITHMETIC_OPERATOR', '+');
+				if (this.input[this.position + 1] === '+') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('INCREMENT', '++');
+				}
             } else if (this.currentChar === '-') {
 				if (this.input[this.position + 1] === '>') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
 					return new Token('ARROW', '->');
+				} else if (this.input[this.position + 1] === '-') {
+					this.currentChar = this.nextChar();
+					this.currentChar = this.nextChar();
+					return new Token('DECREMENT', '--');
 				} else {
 					this.currentChar = this.nextChar();
 					return new Token('ARITHMETIC_OPERATOR', '-');
