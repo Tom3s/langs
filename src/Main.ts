@@ -59,7 +59,7 @@ try {
 	parser.parse();
 	console.log('Syntax is correct!');
 	const program = parser.getProgram();
-	console.log(program.toString());
+	// console.log(program.toString());
 	const programState = new ProgramState(
 		[],
 		prefilledSymbolTable,
@@ -70,8 +70,9 @@ try {
 		try {
 			programState.oneStep();
 		} catch (error: any) {
+			console.log('\n\n==========\nExecution stopped');
 			console.error(error?.message);
-			console.log(`Output: ${programState.outputToString()}`)
+			console.log(`Output: \n${programState.outputToString()}`)
 			break;
 		}
 	}

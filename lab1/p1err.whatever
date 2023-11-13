@@ -1,4 +1,5 @@
-int a = 10 // incorrect declaration
+var kutya: int = asd
+// int a = 10 // incorrect declaration
 
 if a % 2 = 0 { // incorrect operator - should be ==
 	/* do stuff */

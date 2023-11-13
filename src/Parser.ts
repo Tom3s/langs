@@ -51,7 +51,7 @@ export class Parser {
 		while (this.currentTokenIndex < this.tokens.length) {
 			try {
 				const statement = this.parseStatement();
-				console.log(statement);
+				// console.log(statement);
 				this.statements.push(statement);
 			} catch (error: any) {
 				console.log(error?.message);
@@ -73,8 +73,18 @@ export class Parser {
 			}
 			index++;
 		}
-		console.log(this.tokens.slice(lastLineIndex, this.currentTokenIndex).map(token => token.value).join(' '));
-		console.log(`Error at line ${line + 1} at token ${this.tokens[this.currentTokenIndex].value}.`);
+		const nextNewLine = this.tokens.find((token, index) =>
+			(token.type === 'NEWLINE' || token.type === 'OPEN_BRACE')
+			&& index > this.currentTokenIndex
+		)
+		const lineText = this.tokens.slice(lastLineIndex, nextNewLine === undefined ? this.tokens.length : this.tokens.indexOf(nextNewLine)).map(token => token.value).join(' ');
+		const lineNumber = line + 1;
+		const columnNumber = this.currentTokenIndex - lastLineIndex;
+		const exactColumnNumber = this.tokens.slice(lastLineIndex, this.currentTokenIndex).map(token => token.value).join(' ').length;
+
+		console.log(`Error at line ${lineNumber}, column ${exactColumnNumber} at token: ${this.tokens[this.currentTokenIndex].value}`);
+		console.log(lineText);
+		console.log(' '.repeat(exactColumnNumber) + '^');
 	}
 
 	private match(tokenType: string) {
@@ -534,12 +544,13 @@ export class Parser {
 		this.currentTokenIndex++;
 		const type = this.tokens[this.currentTokenIndex];
 		this.currentTokenIndex++;
+		const typeObject = this.typeObjectFromString(type.value);
 		if (!this.match('ASSIGN')) {
-			return new DeclarationStatement(identifier.value, this.typeObjectFromString(type.value), constant);
+			return new DeclarationStatement(identifier.value, typeObject, constant);
 		}
 		this.currentTokenIndex++;
 		const expression = this.parseExpression();
-		return new DeclarationStatement(identifier.value, this.typeObjectFromString(type.value), constant, expression);
+		return new DeclarationStatement(identifier.value, typeObject, constant, expression);
 	}
 
 	private parsePrint(): Statement {

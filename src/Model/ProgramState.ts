@@ -38,7 +38,7 @@ export class ProgramState {
 	}
 
 	outputToString(): string {
-		return this.output.join("");
+		return this.output.join("").replace("\\n", "\n")
 	}
 
 }

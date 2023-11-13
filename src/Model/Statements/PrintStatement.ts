@@ -11,8 +11,10 @@ export class PrintStatement implements Statement {
 
 	execute(programState: ProgramState): ProgramState | null {
 		this.printables.forEach(printable => {
-			programState.output.push(printable.evaluate(programState.symbolTable).body.toString());
-			console.log(printable.evaluate(programState.symbolTable).body.toString());
+			const evaluatedString = printable.evaluate(programState.symbolTable).body.toString();
+			programState.output.push(evaluatedString);
+			// console.log(evaluatedString);
+			process.stdout.write(evaluatedString);
 		});
 		return null;
 	}

@@ -1,83 +1,89 @@
 export class Token {
-    constructor(public type: string, public value: string) {}
+	constructor(public type: string, public value: string) { }
 }
 
 export class Lexer {
-    private input: string;
-    private position: number = 0;
-    private currentChar: string | null = null;
+	private input: string;
+	private position: number = 0;
+	private currentChar: string | null = null;
 
-    // constructor(input: string) {
-	constructor(fileName: string){
+	// constructor(input: string) {
+	constructor(fileName: string) {
 		const fs = require('fs');
 		const path = require('path');
 		const filePath = path.join(__dirname, fileName);
 		const input = fs.readFileSync(filePath, 'utf-8');
 
 		this.input = input.replace(/\r\n/g, '\n');
-        this.currentChar = this.input[0];
-    }
+		this.currentChar = this.input[0];
+	}
 
-    private nextChar(): string | null{
-        this.position++;
-        if (this.position < this.input.length) {
-            return this.input[this.position];
-        } else {
-            return null;
-        }
-    }
+	private nextChar(): string | null {
+		this.position++;
+		if (this.position < this.input.length) {
+			return this.input[this.position];
+		} else {
+			return null;
+		}
+	}
 
-    private skipWhitespace() {
-        while (this.currentChar !== null && /\s/.test(this.currentChar) && !/\n/.test(this.currentChar) && !/\r/.test(this.currentChar)) {
-            this.currentChar = this.nextChar();
-        }
-    }
+	private skipWhitespace() {
+		while (this.currentChar !== null && /\s/.test(this.currentChar) && !/\n/.test(this.currentChar) && !/\r/.test(this.currentChar)) {
+			this.currentChar = this.nextChar();
+		}
+	}
 
-    private isAlpha(char: string) {
-        return /[a-zA-Z_]/.test(char);
-    }
+	private isAlpha(char: string) {
+		return /[a-zA-Z_]/.test(char);
+	}
 
-    private isAlphanumeric(char: string) {
-        return /[a-zA-Z0-9_]/.test(char);
-    }
+	private isAlphanumeric(char: string) {
+		return /[a-zA-Z0-9_]/.test(char);
+	}
 
-    private getNextToken(): Token | null {
-        while (this.currentChar !== null) {
+	private validIdentifier(value: string) {
+		return /^[a-zA-Z0-9]*[a-zA-Z][a-zA-Z0-9]*$/.test(value);
+	}
+
+	private getNextToken(): Token | null {
+		while (this.currentChar !== null) {
 			if (/\n/.test(this.currentChar) || /\r/.test(this.currentChar)) {
 				// Handle newline characters (CR, LF, or CRLF)
 				this.currentChar = this.nextChar();
 				return new Token('NEWLINE', '\n');
 			}
 
-            if (/\s/.test(this.currentChar)) {
-                this.skipWhitespace();
-                continue;
-            }
+			if (/\s/.test(this.currentChar)) {
+				this.skipWhitespace();
+				continue;
+			}
 
-            if (this.isAlpha(this.currentChar)) {
-                let value = '';
-                while (this.currentChar !== null && this.isAlphanumeric(this.currentChar)) {
-                    value += this.currentChar;
-                    this.currentChar = this.nextChar();
-                }
+			if (this.isAlpha(this.currentChar)) {
+				let value = '';
+				while (this.currentChar !== null && this.isAlphanumeric(this.currentChar)) {
+					value += this.currentChar;
+					this.currentChar = this.nextChar();
+				}
 
-                // Check for keywords or identifiers
-                if (value === 'var' || value === 'const') {
-                    return new Token('DECLARATION', value);
-                } else if (value === 'int' || value === 'float' || value === 'bool' || value === 'str' || value === 'list') {
-                    return new Token('TYPE', value);
-                } else if (value === 'if' || value === 'else' || value === 'while' || value === 'do' || value === 'for' || value === 'break' || value === 'continue' || value === 'return' || value === 'func' || value === 'in') {
-                    return new Token('CONTROL', value);
+				// Check for keywords or identifiers
+				if (value === 'var' || value === 'const') {
+					return new Token('DECLARATION', value);
+				} else if (value === 'int' || value === 'float' || value === 'bool' || value === 'str' || value === 'list') {
+					return new Token('TYPE', value);
+				} else if (value === 'if' || value === 'else' || value === 'while' || value === 'do' || value === 'for' || value === 'break' || value === 'continue' || value === 'return' || value === 'func' || value === 'in') {
+					return new Token('CONTROL', value);
 				} else if (value === 'print' || value === 'read' || value === 'readln') {
 					return new Token('IO', value);
-                } else if (value === 'true' || value === 'false') {
+				} else if (value === 'true' || value === 'false') {
 					return new Token('BOOLEAN', value);
 				} else if (value === 'pi' || value === 'e' || value === 'null') {
 					return new Token('CONSTANT', value);
+				} else if (this.validIdentifier(value)) {
+					return new Token('IDENTIFIER', value);
 				} else {
-                    return new Token('IDENTIFIER', value);
-                }
-            }
+					throw new Error('Invalid identifier: ' + value);
+				}
+			}
 
 			if (this.currentChar === '(') {
 				this.currentChar = this.nextChar();
@@ -93,12 +99,12 @@ export class Lexer {
 				return new Token('CLOSE_BRACE', '}');
 			}
 
-            // Add more conditions for operators, numbers, strings, and other tokens.
+			// Add more conditions for operators, numbers, strings, and other tokens.
 
-            // Example for '+':
-            if (this.currentChar === '+') {
-                // this.currentChar = this.nextChar();
-                // return new Token('ARITHMETIC_OPERATOR', '+');
+			// Example for '+':
+			if (this.currentChar === '+') {
+				// this.currentChar = this.nextChar();
+				// return new Token('ARITHMETIC_OPERATOR', '+');
 				if (this.input[this.position + 1] === '+') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
@@ -107,7 +113,7 @@ export class Lexer {
 					this.currentChar = this.nextChar();
 					return new Token('ARITHMETIC_OPERATOR', '+');
 				}
-            } else if (this.currentChar === '-') {
+			} else if (this.currentChar === '-') {
 				if (this.input[this.position + 1] === '>') {
 					this.currentChar = this.nextChar();
 					this.currentChar = this.nextChar();
@@ -215,7 +221,7 @@ export class Lexer {
 				}
 				return new Token('NUMBER', value);
 			}
-	
+
 			// Handle strings (double-quoted or single-quoted)
 			if (this.currentChar === '"' || this.currentChar === "'") {
 				const quoteChar = this.currentChar;
@@ -232,7 +238,7 @@ export class Lexer {
 					throw new Error('Unterminated string');
 				}
 			}
-            // Add more conditions for other operators, numbers, strings, and other tokens.
+			// Add more conditions for other operators, numbers, strings, and other tokens.
 
 			if (this.currentChar === ':') {
 				this.currentChar = this.nextChar();
@@ -246,60 +252,48 @@ export class Lexer {
 			} else if (this.currentChar === '?') {
 				this.currentChar = this.nextChar();
 				return new Token('QUESTION', '?');
-			// } else if (this.currentChar.test(/[\n\r]/)) {
-			} 
+			}
 
-            // Handle comments
+			throw new Error('Invalid character: ' + this.currentChar);
+		}
+		return null;
+	}
 
-            // if (this.currentChar === '/') {
-            //     this.currentChar = this.nextChar();
-            //     if (this.currentChar === '/') {
-            //         // Single-line comment
-            //         while (this.currentChar !== null && this.currentChar !== '\n') {
-            //             this.currentChar = this.nextChar();
-            //         }
-            //     } else if (this.currentChar === '*') {
-            //         // Multi-line comment
-            //         this.currentChar = this.nextChar();
-            //         while (this.currentChar !== null) {
-            //             if (this.currentChar === '*' && this.input[this.position + 1] === '/') {
-            //                 this.currentChar = this.nextChar();
-            //                 this.currentChar = this.nextChar();
-            //                 break;
-            //             }
-            //             this.currentChar = this.nextChar();
-            //         }
-            //     }
-            //     continue; // Continue to the next token
-            // }
+	public tokenize(): Token[] {
+		const tokens: Token[] = [];
+		let token = this.getNextToken();
+		try {
+			while (token !== null) {
+				tokens.push(token);
+				token = this.getNextToken();
+			}
+			return tokens;
+		} catch (error: any) {
+			console.log(error?.message);
+			this.printError();
+			throw error;
+		}
+	}
 
-            // If none of the conditions match, throw an error or handle it as needed.
-
-            throw new Error('Invalid character: ' + this.currentChar);
-        }
-        return null;
-    }
-
-    public tokenize(): Token[] {
-        const tokens: Token[] = [];
-        let token = this.getNextToken();
-        while (token !== null) {
-            tokens.push(token);
-            token = this.getNextToken();
-        }
-		// delete consecutive newlines, and leave just one
-		// for (let i = 0; i < tokens.length; i++) {
-		// 	if (tokens[i].type === 'NEWLINE') {
-		// 		while (tokens[i + 1] && tokens[i + 1].type === 'NEWLINE') {
-		// 			tokens.splice(i + 1, 1);
-		// 		}
-		// 	}
-		// }
-
-		// console.log(tokens);
-
-        return tokens;
-    }
+	private printError() {
+		let line = 0;
+		let index = 0;
+		let lastLineIndex = 0;
+		while (index < this.position) {
+			if (this.input[index] === '\n') {
+				line++;
+				lastLineIndex = index;
+			}
+			index++;
+		}
+		const nextNewline = this.input.indexOf('\n', this.position);
+		const lineText = this.input.substring(lastLineIndex + 1, nextNewline);
+		const lineNumber = line + 1;
+		const column = this.position - lastLineIndex;
+		console.log('Lexical error at line ' + lineNumber + ' column ' + column + ': ' + lineText);
+		console.log(lineText);
+		console.log(' '.repeat(column - 1) + '^');
+	}
 }
 
 
