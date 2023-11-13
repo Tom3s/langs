@@ -28,9 +28,42 @@ const lexer = new Lexer('../lab1/p1.whatever');
 const tokens = lexer.tokenize();
 const parser = new Parser(tokens);
 
+const prefilledSymbolTable = new SymbolTable(16);
+prefilledSymbolTable.add('toInt', new FunctionValue(
+	new IntegerType(),
+	[
+		new DeclarationStatement('s', new StringType())
+	],
+	new CompoundStatement([
+		new ReturnStatement(
+			new ConversionExpression(
+				new VariableExpression('s'),
+				new IntegerType()
+			)
+		)
+	])
+));
+
 try {
     parser.parse();
     console.log('Syntax is correct!');
+	const program = parser.getProgram();
+	// console.log(program.toString());
+	const programState = new ProgramState(
+		[],
+		prefilledSymbolTable,
+		[],
+		program
+	);
+	while (true) {
+		try {
+			programState.oneStep();
+		} catch (error: any) {
+			console.error(error?.message);
+			console.log(`Output: ${programState.outputToString()}`)
+			break;
+		}
+	}
 } catch (error: any) {
     console.error('Syntax error:', error?.message);
 }

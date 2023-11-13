@@ -37,4 +37,8 @@ export class ProgramState {
 		this.executionStack.push(this.originalProgram.deepCopy());
 	}
 
+	outputToString(): string {
+		return this.output.join("");
+	}
+
 }

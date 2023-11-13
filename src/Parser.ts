@@ -36,6 +36,10 @@ export class Parser {
 		this.tokens = tokens;
 	}
 
+	getProgram(): CompoundStatement {
+		return new CompoundStatement(this.statements);
+	}
+
 	parse(): void {
 		// const statements: Statement[] = [];
 
@@ -49,7 +53,8 @@ export class Parser {
 
 	private match(tokenType: string) {
 		// Check if the current token matches the expected token type.
-		return this.tokens[this.currentTokenIndex].type === tokenType;
+		return this.currentTokenIndex < this.tokens.length && 
+			this.tokens[this.currentTokenIndex].type === tokenType;
 	}
 
 	// Example parsing method for statements
@@ -337,18 +342,21 @@ export class Parser {
 				throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
 			}
 			// let paren = 1;
+			const expressionParentheses = this.parentheses;
 			this.parentheses++;
 			this.currentTokenIndex++;
 			const expressionList = [];
-			while (this.parentheses) {
+			while (this.parentheses > expressionParentheses) {
 				expressionList.push(this.parseExpression());
 				if (this.match('COMMA')) {
 					this.currentTokenIndex++;
 				}
 				if (this.match('CLOSE_PAREN')) {
 					this.parentheses--;
+					this.currentTokenIndex++;
 				} else if (this.match('OPEN_PAREN')) {
 					this.parentheses++;
+					this.currentTokenIndex++;
 				}
 			}
 			this.currentTokenIndex++;
@@ -360,6 +368,7 @@ export class Parser {
 	}
 
 	private parseExpression(): Expression {
+		const expressionParentheses = this.parentheses;
 		const nextNewLine = this.tokens.find((token, index) =>
 			(token.type === 'NEWLINE' || token.type === 'OPEN_BRACE')
 			&& index > this.currentTokenIndex
@@ -368,31 +377,31 @@ export class Parser {
 			throw new Error('Expected newline.');
 		}
 		const newLineIndex = this.tokens.indexOf(nextNewLine);
-		const expressionTokens = this.tokens.slice(this.currentTokenIndex, newLineIndex);
+		const parseExpTokens = this.tokens.slice(this.currentTokenIndex, newLineIndex);
 
 		const expressions: Expression[] = [];
-		let expressionIndex = 0;
-		while (expressionIndex < expressionTokens.length) {
-			if (expressionTokens[expressionIndex].type === 'IDENTIFIER') {
+		// let this.currentTokenIndex = 0;
+		while (this.currentTokenIndex < newLineIndex) {
+			if (this.match('IDENTIFIER')) {
 				expressions.push(
 					new VariableExpression(
-						expressionTokens[expressionIndex].value
+						this.tokens[this.currentTokenIndex].value
 					)
 				);
-				expressionIndex++;
-			} else if (expressionTokens[expressionIndex].type === 'IO') {
-				if (expressionTokens[expressionIndex].value !== 'read') {
+				this.currentTokenIndex++;
+			} else if (this.match('IO')) {
+				if (this.tokens[this.currentTokenIndex].value !== 'read') {
 					throw new Error(`Expected read at index ${this.currentTokenIndex}.`);
 				}
 
-				expressionIndex++;
-				if (expressionTokens[expressionIndex].type !== 'OPEN_PAREN') {
+				this.currentTokenIndex++;
+				if (this.tokens[this.currentTokenIndex].type !== 'OPEN_PAREN') {
 					throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
 				}
 				this.parentheses++;
 
-				expressionIndex++;
-				if (expressionTokens[expressionIndex].type !== 'CLOSE_PAREN') {
+				this.currentTokenIndex++;
+				if (this.tokens[this.currentTokenIndex].type !== 'CLOSE_PAREN') {
 					throw new Error(`Expected ) at index ${this.currentTokenIndex}.`);
 				}
 				this.parentheses--;
@@ -400,9 +409,9 @@ export class Parser {
 				expressions.push(
 					new ReadExpression()
 				);
-				expressionIndex++;
-			} else if (expressionTokens[expressionIndex].type === 'NUMBER') {
-				const value = expressionTokens[expressionIndex].value;
+				this.currentTokenIndex++;
+			} else if (this.match('NUMBER')) {
+				const value = this.tokens[this.currentTokenIndex].value;
 				if (value.indexOf('.') !== -1) {
 					expressions.push(
 						new ValueExpression(
@@ -416,34 +425,35 @@ export class Parser {
 						)
 					);
 				}
-			} else if (expressionTokens[expressionIndex].type === 'DOT') {
-				expressionIndex++;
-				if (expressionTokens[expressionIndex].type !== 'IDENTIFIER') {
+			} else if (this.match('DOT')) {
+				this.currentTokenIndex++;
+				if (this.tokens[this.currentTokenIndex].type !== 'IDENTIFIER') {
 					throw new Error(`Expected identifier at index ${this.currentTokenIndex}.`);
 				}
 
-				const methodIdentifier = expressionTokens[expressionIndex];
-				expressionIndex++;
-				if (expressionTokens[expressionIndex].type !== 'OPEN_PAREN') {
+				const methodIdentifier = this.tokens[this.currentTokenIndex];
+				this.currentTokenIndex++;
+				if (this.tokens[this.currentTokenIndex].type !== 'OPEN_PAREN') {
 					throw new Error(`Expected ( at index ${this.currentTokenIndex}.`);
 				}
+				const localParentheses = this.parentheses;
 				this.parentheses++;
-				expressionIndex++;
+				this.currentTokenIndex++;
 				// let paren = 1;
 				const expressionList = [];
-				while (this.parentheses) {
-					if (expressionTokens[expressionIndex].type === 'CLOSE_PAREN') {
+				while (this.parentheses > localParentheses) {
+					if (this.match('CLOSE_PAREN')) {
 						this.parentheses--;
-						if (this.parentheses === 0) {
+						if (this.parentheses === localParentheses) {
 							break;
 						}
-					} else if (expressionTokens[expressionIndex].type === 'OPEN_PAREN') {
+					} else if (this.match('OPEN_PAREN')) {
 						this.parentheses++;
 					}
-					this.currentTokenIndex += expressionIndex;
+					this.currentTokenIndex++;
 					expressionList.push(this.parseExpression());
-					if (expressionTokens[expressionIndex].type === 'COMMA') {
-						expressionIndex++;
+					if (this.match('COMMA')) {
+						this.currentTokenIndex++;
 					}
 				}
 				const methodObject = expressions.pop();
@@ -454,29 +464,31 @@ export class Parser {
 					new MethodCallExpression(
 						methodObject,
 						methodIdentifier.value,
-						expressionList.filter(expression => expression instanceof NOPExpression)
+						expressionList.filter(expression => !(expression instanceof NOPExpression))
 					)
 				);
-				expressionIndex++;
+				this.currentTokenIndex++;
 
-			} else if (expressionTokens[expressionIndex].type === 'OPEN_PAREN') {
-				expressionIndex++;
+			} else if (this.match('OPEN_PAREN')) {
+				const localParentheses = this.parentheses;
+				this.currentTokenIndex++;
 				this.parentheses++;
 				// let paren = 1;
 				const expressionList = [];
-				while (this.parentheses) {
-					if (expressionTokens[expressionIndex].type === 'CLOSE_PAREN') {
+				while (this.parentheses > localParentheses) {
+					if (this.match('CLOSE_PAREN')) {
 						this.parentheses--;
-						if (this.parentheses === 0) {
+						this.currentTokenIndex++;
+						if (this.parentheses === localParentheses) {
 							break;
 						}
-					} else if (expressionTokens[expressionIndex].type === 'OPEN_PAREN') {
+					} else if (this.match('OPEN_PAREN')) {
 						this.parentheses++;
+						this.currentTokenIndex++;
 					}
-					this.currentTokenIndex += expressionIndex + 1;
 					expressionList.push(this.parseExpression());
-					if (expressionTokens[expressionIndex].type === 'COMMA') {
-						expressionIndex++;
+					if (this.match('COMMA')) {
+						this.currentTokenIndex++;
 					}
 				}
 				const identifier = expressions.pop();
@@ -486,22 +498,27 @@ export class Parser {
 				expressions.push(
 					new FunctionCallExpression(
 						(identifier as VariableExpression).identifier,
-						expressionList.filter(expression => expression instanceof NOPExpression)
+						expressionList.filter(expression => !(expression instanceof NOPExpression))
 					)
 				);
-				expressionIndex++;
+				this.currentTokenIndex++;
 
-			} else if (expressionTokens[expressionIndex].type === 'CLOSE_PAREN') {
+			} else if (this.match('CLOSE_PAREN')) {
 				this.parentheses--;
-				expressionIndex++;
-			} else if (expressionTokens[expressionIndex].type === 'RELATIONAL_OPERATOR') {
-				const operator = expressionTokens[expressionIndex].value;
-				expressionIndex++;
+				this.currentTokenIndex++;
+				if (expressionParentheses === this.parentheses) {
+					if (expressions.length === 0) {
+						return new NOPExpression();
+					}
+					return expressions[0];
+				}
+			} else if (this.match('RELATIONAL_OPERATOR')) {
+				const operator = this.tokens[this.currentTokenIndex].value;
+				this.currentTokenIndex++;
 				const left = expressions.pop();
 				if (left === undefined) {
 					throw new Error('Expected left operand.');
 				}
-				this.currentTokenIndex += expressionIndex;
 				const right = this.parseExpression();
 				expressions.push(
 					new RelationalExpression(
@@ -510,14 +527,13 @@ export class Parser {
 						operator as RelationalOperator
 					)
 				);
-			} else if (expressionTokens[expressionIndex].type === 'ARITHMETIC_OPERATOR') {
-				const operator = expressionTokens[expressionIndex].value;
-				expressionIndex++;
+			} else if (this.match('ARITHMETIC_OPERATOR')) {
+				const operator = this.tokens[this.currentTokenIndex].value;
+				this.currentTokenIndex++;
 				const left = expressions.pop();
 				if (left === undefined) {
 					throw new Error('Expected left operand.');
 				}
-				this.currentTokenIndex += expressionIndex;
 				const right = this.parseExpression();
 				expressions.push(
 					new ArithmeticExpression(
@@ -526,8 +542,8 @@ export class Parser {
 						operator as ArithmeticOperator
 					)
 				);
-			} else if (expressionTokens[expressionIndex].type === 'STRING') {
-				const value: string = expressionTokens[expressionIndex].value as string;
+			} else if (this.match('STRING')) {
+				const value: string = this.tokens[this.currentTokenIndex].value as string;
 				expressions.push(
 					new ValueExpression(
 						new StringValue(
@@ -535,9 +551,9 @@ export class Parser {
 						)
 					)
 				);
-				expressionIndex++;
-			} else if (expressionTokens[expressionIndex].type === 'COMMA') {
-				this.currentTokenIndex += expressionIndex;
+				this.currentTokenIndex++;
+			} else if (this.match('COMMA')) {
+				this.currentTokenIndex++;
 				return expressions[0];
 			}
 		}
@@ -556,9 +572,9 @@ export class Parser {
 		throw new Error(`Unexpected token ${this.tokens[this.currentTokenIndex].value} at index ${this.currentTokenIndex}.`);
 	}
 
-	private parsePartialExpression(expressionTokens: Token[], expressionIndex: number): Expression {
-		throw new Error('Not implemented.');
-	}
+	// private parsePartialExpression(this.tokens: Token[], this.currentTokenIndex: number): Expression {
+	// 	throw new Error('Not implemented.');
+	// }
 
 	// private parseMethodCall(): Expression {
 	// 	this.currentTokenIndex++;
