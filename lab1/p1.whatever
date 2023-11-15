@@ -3,6 +3,10 @@ var a: int = read().toInt()
 var b: int = read().toInt()
 var c: int = read().toInt()
 
+func bwoah(kuka: int) -> void {
+	print("BWOAH")
+}
+
 func gcd(a: int, b: int) -> int {
 	while a != b {
 		if a > b {

@@ -39,4 +39,8 @@ export default class SymbolTable {
 	getKeys(): string[] {
 		return this.hashTable.getKeys();
 	}
+
+	toString(): string {
+		return this.hashTable.toString();
+	}
 }

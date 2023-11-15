@@ -18,7 +18,7 @@ export class AssignStatement implements Statement {
 
 		const value = this.expression.evaluate(symbolTable);
 		const variableType = symbolTable.get(this.identifier)?.getType();
-		if (variableType && !value.getType().equals(variableType)) {
+		if (variableType && !variableType.equals(value.getType())) {
 			throw new Error(`Cannot assign value of type ${value.getType()} to variable of type ${variableType}`);
 		}
 		// console.log(`Assigning ${this.identifier} = ${this.expression.toString()} (${value.toString()})`);

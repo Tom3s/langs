@@ -1,0 +1,538 @@
+[
+	{
+		"type": "DECLARATION",
+		"value": "var"
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "a"
+	},
+	{
+		"type": "COLON",
+		"value": ":"
+	},
+	{
+		"type": "TYPE",
+		"value": "int"
+	},
+	{
+		"type": "ASSIGN",
+		"value": "="
+	},
+	{
+		"type": "IO",
+		"value": "read"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "DOT",
+		"value": "."
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "toInt"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "COMMENT",
+		"value": "//"
+	},
+	{
+		"type": "DECLARATION",
+		"value": "var"
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "a"
+	},
+	{
+		"type": "COLON",
+		"value": ":"
+	},
+	{
+		"type": "TYPE",
+		"value": "int"
+	},
+	{
+		"type": "ASSIGN",
+		"value": "="
+	},
+	{
+		"type": "NUMBER",
+		"value": "15"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "func"
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "isPrime"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "n"
+	},
+	{
+		"type": "COLON",
+		"value": ":"
+	},
+	{
+		"type": "TYPE",
+		"value": "int"
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "ARROW",
+		"value": "->"
+	},
+	{
+		"type": "TYPE",
+		"value": "bool"
+	},
+	{
+		"type": "OPEN_BRACE",
+		"value": "{"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "if"
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "n"
+	},
+	{
+		"type": "RELATIONAL_OPERATOR",
+		"value": "<="
+	},
+	{
+		"type": "NUMBER",
+		"value": "1"
+	},
+	{
+		"type": "OPEN_BRACE",
+		"value": "{"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "return"
+	},
+	{
+		"type": "BOOLEAN",
+		"value": "false"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CLOSE_BRACE",
+		"value": "}"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "if"
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "n"
+	},
+	{
+		"type": "RELATIONAL_OPERATOR",
+		"value": "=="
+	},
+	{
+		"type": "NUMBER",
+		"value": "2"
+	},
+	{
+		"type": "OPEN_BRACE",
+		"value": "{"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "return"
+	},
+	{
+		"type": "BOOLEAN",
+		"value": "true"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CLOSE_BRACE",
+		"value": "}"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "if"
+	},
+	{
+		"type": "NUMBER",
+		"value": "0"
+	},
+	{
+		"type": "RELATIONAL_OPERATOR",
+		"value": "=="
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "n"
+	},
+	{
+		"type": "ARITHMETIC_OPERATOR",
+		"value": "%"
+	},
+	{
+		"type": "NUMBER",
+		"value": "2"
+	},
+	{
+		"type": "OPEN_BRACE",
+		"value": "{"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "return"
+	},
+	{
+		"type": "BOOLEAN",
+		"value": "false"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CLOSE_BRACE",
+		"value": "}"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "for"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "DECLARATION",
+		"value": "var"
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "i"
+	},
+	{
+		"type": "COLON",
+		"value": ":"
+	},
+	{
+		"type": "TYPE",
+		"value": "int"
+	},
+	{
+		"type": "ASSIGN",
+		"value": "="
+	},
+	{
+		"type": "NUMBER",
+		"value": "3"
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "i"
+	},
+	{
+		"type": "RELATIONAL_OPERATOR",
+		"value": "<="
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "sqrt"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "n"
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "i"
+	},
+	{
+		"type": "INCREMENT",
+		"value": "++"
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "OPEN_BRACE",
+		"value": "{"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "if"
+	},
+	{
+		"type": "NUMBER",
+		"value": "0"
+	},
+	{
+		"type": "RELATIONAL_OPERATOR",
+		"value": "=="
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "n"
+	},
+	{
+		"type": "ARITHMETIC_OPERATOR",
+		"value": "%"
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "i"
+	},
+	{
+		"type": "OPEN_BRACE",
+		"value": "{"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "return"
+	},
+	{
+		"type": "BOOLEAN",
+		"value": "false"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CLOSE_BRACE",
+		"value": "}"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CLOSE_BRACE",
+		"value": "}"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CONTROL",
+		"value": "return"
+	},
+	{
+		"type": "BOOLEAN",
+		"value": "true"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "CLOSE_BRACE",
+		"value": "}"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	},
+	{
+		"type": "IO",
+		"value": "print"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "a"
+	},
+	{
+		"type": "COMMA",
+		"value": ","
+	},
+	{
+		"type": "STRING",
+		"value": "\" is \""
+	},
+	{
+		"type": "COMMA",
+		"value": ","
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "isPrime"
+	},
+	{
+		"type": "OPEN_PAREN",
+		"value": "("
+	},
+	{
+		"type": "IDENTIFIER",
+		"value": "a"
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "QUESTION",
+		"value": "?"
+	},
+	{
+		"type": "STRING",
+		"value": "\"\""
+	},
+	{
+		"type": "COLON",
+		"value": ":"
+	},
+	{
+		"type": "STRING",
+		"value": "\"not \""
+	},
+	{
+		"type": "COMMA",
+		"value": ","
+	},
+	{
+		"type": "STRING",
+		"value": "\"prime\""
+	},
+	{
+		"type": "CLOSE_PAREN",
+		"value": ")"
+	},
+	{
+		"type": "NEWLINE",
+		"value": "\n"
+	}
+]

@@ -1,0 +1,280 @@
+{
+	"hashTable": {
+		"keys": [
+			null,
+			"a",
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			"isPrime",
+			"sqrt",
+			null,
+			null,
+			null,
+			"toInt",
+			null
+		],
+		"values": [
+			null,
+			{
+				"body": 17,
+				"constant": false
+			},
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			{
+				"returnType": {},
+				"parameters": [
+					{
+						"name": "n",
+						"type": {},
+						"constant": false,
+						"value": null
+					}
+				],
+				"body": {
+					"statements": [
+						{
+							"condition": {
+								"left": {
+									"identifier": "n"
+								},
+								"right": {
+									"value": {
+										"body": 1,
+										"constant": true
+									}
+								},
+								"operator": "<="
+							},
+							"trueBranch": {
+								"statements": [
+									{
+										"value": {
+											"value": {
+												"body": false,
+												"constant": true
+											}
+										}
+									}
+								]
+							},
+							"falseBranch": null
+						},
+						{
+							"condition": {
+								"left": {
+									"identifier": "n"
+								},
+								"right": {
+									"value": {
+										"body": 2,
+										"constant": true
+									}
+								},
+								"operator": "=="
+							},
+							"trueBranch": {
+								"statements": [
+									{
+										"value": {
+											"value": {
+												"body": true,
+												"constant": true
+											}
+										}
+									}
+								]
+							},
+							"falseBranch": null
+						},
+						{
+							"condition": {
+								"left": {
+									"value": {
+										"body": 0,
+										"constant": true
+									}
+								},
+								"right": {
+									"left": {
+										"identifier": "n"
+									},
+									"right": {
+										"value": {
+											"body": 2,
+											"constant": true
+										}
+									},
+									"operator": "%"
+								},
+								"operator": "=="
+							},
+							"trueBranch": {
+								"statements": [
+									{
+										"value": {
+											"value": {
+												"body": false,
+												"constant": true
+											}
+										}
+									}
+								]
+							},
+							"falseBranch": null
+						},
+						{
+							"iterator": "i",
+							"initialValue": {
+								"value": {
+									"body": 3,
+									"constant": true
+								}
+							},
+							"continueCondition": {
+								"left": {
+									"identifier": "i"
+								},
+								"right": {
+									"identifier": "sqrt",
+									"parameters": [
+										{
+											"identifier": "n"
+										}
+									]
+								},
+								"operator": "<="
+							},
+							"postLoopStatement": {
+								"identifier": "i",
+								"expression": {
+									"left": {
+										"identifier": "i"
+									},
+									"right": {
+										"value": {
+											"body": 1,
+											"constant": true
+										}
+									},
+									"operator": "+"
+								}
+							},
+							"body": {
+								"statements": [
+									{
+										"condition": {
+											"left": {
+												"value": {
+													"body": 0,
+													"constant": true
+												}
+											},
+											"right": {
+												"left": {
+													"identifier": "n"
+												},
+												"right": {
+													"identifier": "i"
+												},
+												"operator": "%"
+											},
+											"operator": "=="
+										},
+										"trueBranch": {
+											"statements": [
+												{
+													"value": {
+														"value": {
+															"body": false,
+															"constant": true
+														}
+													}
+												}
+											]
+										},
+										"falseBranch": null
+									}
+								]
+							}
+						},
+						{
+							"value": {
+								"value": {
+									"body": true,
+									"constant": true
+								}
+							}
+						}
+					]
+				},
+				"constant": false
+			},
+			{
+				"returnType": {},
+				"parameters": [
+					{
+						"name": "x",
+						"type": {},
+						"constant": false,
+						"value": null
+					}
+				],
+				"body": {
+					"statements": [
+						{
+							"value": {
+								"returnType": {},
+								"parameters": [
+									{
+										"identifier": "x"
+									}
+								]
+							}
+						}
+					]
+				},
+				"constant": false
+			},
+			null,
+			null,
+			null,
+			{
+				"returnType": {},
+				"parameters": [
+					{
+						"name": "s",
+						"type": {},
+						"constant": false,
+						"value": null
+					}
+				],
+				"body": {
+					"statements": [
+						{
+							"value": {
+								"expression": {
+									"identifier": "s"
+								},
+								"toType": {}
+							}
+						}
+					]
+				},
+				"constant": false
+			},
+			null
+		],
+		"fullSize": 16
+	}
+}

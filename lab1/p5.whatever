@@ -19,7 +19,7 @@ func argTest(a: int, b: float, c: str) -> bool {
 
 var truthy: bool = argTest(-10, -0.2, "")
 
-var a: int = -1.5
+var a: int = -1
 var b: int = 10
 
 print ("b - a with '+' operator ", b + a)

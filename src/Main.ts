@@ -22,6 +22,9 @@ const lexer = new Lexer('.' + process.argv[2]);
 let tokens: any[] = [];
 try {
 	tokens = lexer.tokenize();
+	
+	const fs = require('fs');
+	// fs.writeFileSync('PIF.out', JSON.stringify(tokens, null, '\t'));
 	console.log('Lexically correct!');
 } catch (error: any) {
 	console.log('Lexical error:', error?.message);
@@ -80,6 +83,7 @@ try {
 			console.log('\n\n==========\nExecution stopped');
 			console.error(error?.message);
 			console.log(`Output: \n${programState.outputToString()}`)
+			// require('fs').writeFileSync('ST.out', JSON.stringify(programState.symbolTable, null, '\t'));
 			break;
 		}
 	}
