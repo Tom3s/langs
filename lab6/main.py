@@ -1,4 +1,5 @@
 import json
+import random
 
 
 class Grammar:
@@ -75,26 +76,47 @@ class Grammar:
 		return matching_productions
 
 	def is_cfg(self):
-		# Check if every production is in the form A -> α, where α is a string of terminals and nonterminals
-		for production in self.productions:
-			if not production[1]:
-				# Handle ε-productions
-				continue
-			for symbol in production[1]:
-				if symbol not in self.terminals and symbol not in self.nonterminals:
+		for nonterminal in self.nonterminals:
+			for nonterminal2 in self.nonterminals:
+				if nonterminal == nonterminal2:
+					continue
+				if self.productions_match(nonterminal, nonterminal2):
 					return False
-		return True
+		else:
+			return True
 
+	def productions_match(self, noterminal1: str, nonterminal2: str) -> bool:
+		productions1 = self.productions_for_nonterminal(noterminal1)
+		productions2 = self.productions_for_nonterminal(nonterminal2)
+  
+		if len(productions1) != len(productions2):
+			return False
+		for production in productions1:
+			if production not in productions2:
+				return False
+		return True
 
 # Example Usage:
 grammar = Grammar()
-grammar.read_grammar_from_file('lab6/grammar.txt')
+
+file = input("1. g1.txt (smaller)\n2. g2.txt (custom mini-language syntax)\n>>> ")
+
+if file == "1":
+	grammar.read_grammar_from_file('lab6/g1.txt')
+elif file == "2":
+	grammar.read_grammar_from_file('lab6/g2.txt')
+else:
+    print("Invalid input")
+    exit()
 
 grammar.print_nonterminals()
 grammar.print_terminals()
 grammar.print_productions()
 
-nonterminal = 'S'
+# nonterminal = random.choice(list(grammar.nonterminals))
+
+nonterminal = input("See productions for: ")
+
 print(f"Productions for {nonterminal}: {grammar.productions_for_nonterminal(nonterminal)}")
 
 if grammar.is_cfg():

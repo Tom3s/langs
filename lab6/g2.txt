@@ -1,6 +1,6 @@
 program ::= cmpdstmt
 type1 ::= "int" | "float" | "bool" | "char" | "str" | "list" | "dict"
-arraydecl ::= type1"[]" | "list" "[" type1 "]"
+arraydecl ::= type1 "[]" | "list" "[" type1 "]"
 dictdecl ::= "dict" "[" type1 "," type1 "]" | "dict" "[" type1 "," arraydecl "]"
 type  ::= type1 | arraydecl | dictdecl
 cmpdstmt ::= stmtlist | "{" "\n" stmtlist "}"
