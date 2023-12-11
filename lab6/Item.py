@@ -1,8 +1,8 @@
 class Item:
-    def __init__ (self,l,r,d):
-        self.lhs = l #string
-        self.rhs = r #list
-        self.dotPos = d #int
+    def __init__ (self, l: str, r: list, d: int):
+        self.lhs: str = l
+        self.rhs: list = r
+        self.dotPos: int = d
 
     def getLhs(self) :
         return self.lhs
