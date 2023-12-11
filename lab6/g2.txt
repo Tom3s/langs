@@ -1,33 +1,22 @@
-program ::= cmpdstmt
-type1 ::= "int" | "float" | "bool" | "char" | "str" | "list" | "dict"
-arraydecl ::= type1 "[]" | "list" "[" type1 "]"
-dictdecl ::= "dict" "[" type1 "," type1 "]" | "dict" "[" type1 "," arraydecl "]"
-type  ::= type1 | arraydecl | dictdecl
-cmpdstmt ::= stmtlist | "{" "\n" stmtlist "}"
-stmtlist ::= stmt "\n" | stmt "\n" stmtlist
-stmt ::= simplstmt | structstmt
-simplstmt ::= assignstmt | iostmt | declaration | declassignstmt
-declaration ::= "var" IDENTIFIER ":" type1 "\n" 
-declassignstmt ::= MUTABILITY IDENTIFIER ":" type1 "=" expression "\n" 
-MUTABILITY ::= "var" | "const" 
-assignstmt ::= IDENTIFIER "=" expression
-expression ::= expression "+" term | expression "-" term | term
-term ::= term "*" factor | term "/" factor | factor
-factor ::= "(" expression ")" | IDENTIFIER | functioncall
-iostmt ::= "read()" | "readln()" | "print(" varlenargs ")"
-varlenargs ::= NONE | expression | expression "," varlenargs
-structstmt ::= cmpdstmt | ifstmt | whilestmt | forstmt | dowhilestmt
-ifstmt ::= "if" condition "{" "\n" cmpdstmt "}" | "if" condition "{" "\n" cmpdstmt "}" "else" stmt
-forstmt ::= "for" IDENTIFIER "in" iterable "{" "\n" cmpdstmt "}" | "for" "(" simplstmt ")" "(" condition ")" "(" simplstmt ")" "{" "\n" cmpdstmt "}"
-iterable ::=  IDENTIFIER | expression
-whilestmt ::= "while" condition "{" "\n" cmpdstmt "}"
-dowhilestmt ::= "do" "{" "\n" cmpdstmt "}" "while" condition "\n"
-cmpdcondition ::= condition | "!" condition | condition LOGICALRELATION cmpdcondition
-condition ::= expression RELATION expression
-RELATION ::= "==" | "!=" | "<" | "<=" | ">" | ">="
-LOGICALRELATION ::= "&&" | "||"
-functiondecl ::= "func" IDENTIFIER "(" arglist ")" "->" type "{" "\n" cmpdstmt "}"
-arglist ::= IDENTIFIER ":" type | IDENTIFIER ":" type "," arglist
-functioncall ::= IDENTIFIER "(" varlenargs ")"
-methodcall ::= IDENTIFIER "." functioncall | functioncall "." functioncall
-comment ::= "//" IGNORED_CODE "\n" | "/*" IGNORED_CODE "*/" | "///" IGNORED_CODE "\n"
+program&statement&statement_list&compound_statement&expression&term&factor&iostmt&simple_type&array_declaration&declaration&assignment_statement&if_statement&while_statement&return_statement&for_statement&for_header&condition&relation&
+start&;&{&}&+&-&*&/&)&(&read&write&IDENTIFIER&CONST&array&[&]&=&if&else&while&return&for&int&string&char&<&<=&==&!=&>=&>&
+program
+program->start compound_statement
+statement->declaration|assignment_statement|if_statement|while_statement|return_statement|for_statement|iostmt
+statement_list->statement|statement ; statement_list
+compound_statement->{ statement_list }
+expression->expression + term|expression - term|term
+term->term * factor|term / factor|factor
+factor->( expression )|IDENTIFIER|CONST
+iostmt->read ( IDENTIFIER )|write ( IDENTIFIER )|write ( CONST )
+simple_type->int|string|char
+array_declaration->array simple_type IDENTIFIER [ ]
+declaration->simple_type IDENTIFIER|array_declaration
+assignment_statement->IDENTIFIER = expression
+if_statement->if ( condition ) compound_statement|if ( condition ) compound_statement else compound_statement
+while_statement->while ( condition ) compound_statement
+return_statement->return expression
+for_statement->for for_header compound_statement
+for_header->( int assignment_statement ; condition ; assignment_statement )
+condition->expression relation expression
+relation-><|<=|==|!=|>=|>
